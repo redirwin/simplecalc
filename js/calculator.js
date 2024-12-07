@@ -15,6 +15,10 @@
         this.MAX_DIGITS = 15;
         this.calculatorDisplay = document.querySelector(".calculator-display");
 
+        // Add new state for expression building
+        this.expression = [];  // Array to store full expression tokens
+        this.parenthesesCount = 0;
+
         this.initializeEventListeners();
     }
 
@@ -89,6 +93,12 @@
             case "toggleSign":
                 this.toggleSign();
                 break;
+            case "leftParen":
+                this.handleLeftParen();
+                break;
+            case "rightParen":
+                this.handleRightParen();
+                break;
         }
     }
 
@@ -97,41 +107,13 @@
      * @param {string} number - The number to append
      */
     appendNumber(number) {
-        console.log("Before appendNumber:", {
-            currentInput: this.currentInput,
-            previousInput: this.previousInput,
-            operation: this.operation,
-            operationString: this.operationString
-        });
-
         if (this.isResultDisplayed) {
-            // Clear everything and start fresh when typing a new number after a result
-            this.currentInput = "";
-            this.previousInput = "";
-            this.operation = null;
-            this.operationString = "";
-            this.isResultDisplayed = false;
-            this.operatorDisplay.textContent = "";
+            this.clear();
         }
 
-        // Handle single input of long number
-        if (number.length > this.MAX_DIGITS) {
-            number = number.slice(0, this.MAX_DIGITS);
-        }
-
-        // Get count of digits (excluding decimal point and minus sign)
-        const currentDigits = this.currentInput
-            .replace(/[.-]/g, '')
-            .length;
-
-        // Check if adding another digit would exceed the limit
-        if (currentDigits >= this.MAX_DIGITS) {
+        // Handle digit limits
+        if (this.currentInput.length >= this.MAX_DIGITS) {
             this.showLimitExceededFeedback();
-            return;
-        }
-
-        // Prevent multiple leading zeros
-        if (number === "0" && this.currentInput === "0") {
             return;
         }
 
@@ -142,20 +124,7 @@
             this.currentInput += number;
         }
 
-        // Update operation string based on current state
-        if (this.operation) {
-            this.operationString = `${this.previousInput} ${this.operation} ${this.currentInput}`;
-        } else {
-            this.operationString = this.currentInput;
-        }
-
-        console.log("After appendNumber:", {
-            currentInput: this.currentInput,
-            previousInput: this.previousInput,
-            operation: this.operation,
-            operationString: this.operationString
-        });
-
+        this.buildOperationString();
         this.updateDisplay();
     }
 
@@ -185,27 +154,15 @@
      * @param {string} op - The operation to set
      */
     setOperation(op) {
-        if (this.currentInput === "") return;
+        if (this.currentInput === "" && this.expression.length === 0) return;
 
-        // If we're starting from a displayed result, use it as the first number
-        if (this.isResultDisplayed) {
-            this.previousInput = this.currentInput;
-            this.operationString = `${this.currentInput} ${op}`;
-            this.isResultDisplayed = false;
-            this.operatorDisplay.textContent = "";
-        } else {
-            // If we already have an operation in progress, store the new number
-            if (this.operation) {
-                this.previousInput = this.previousInput + " " + this.operation + " " + this.currentInput;
-            } else {
-                this.previousInput = this.currentInput;
-            }
-            this.operationString = `${this.previousInput} ${op}`;
+        if (this.currentInput) {
+            this.expression.push(this.currentInput);
+            this.currentInput = "";
         }
-
-        this.operation = op;
-        this.currentInput = "";
+        this.expression.push(op);
         
+        this.buildOperationString();
         this.updateDisplay();
     }
 
@@ -251,47 +208,106 @@
     }
 
     /**
-     * Performs the calculation
+     * Performs the calculation respecting parentheses and order of operations
      */
     calculate() {
-        if (!this.operation || !this.previousInput || this.currentInput === "") return;
-
-        const fullOperation = `${this.previousInput} ${this.operation} ${this.currentInput}`;
-
-        // Perform calculation
-        let result;
-        const prev = parseFloat(this.previousInput);
-        const current = parseFloat(this.currentInput);
-
-        switch (this.operation) {
-            case "+":
-                result = prev + current;
-                break;
-            case "-":
-                result = prev - current;
-                break;
-            case "*":
-                result = prev * current;
-                break;
-            case "/":
-                result = current !== 0 ? prev / current : "Error";
-                break;
-            default:
-                return;
+        if (this.currentInput) {
+            this.expression.push(this.currentInput);
         }
 
-        if (result === "Error") {
-            this.currentInput = "Error";
-            this.operationString = "Error";
-        } else {
+        const fullExpression = this.operationString;
+        
+        try {
+            // First evaluate parentheses
+            let result = this.evaluateParentheses(fullExpression);
+            
+            // Format and store result
             this.currentInput = this.formatCalculationResult(result);
-            this.operationString = fullOperation;
+            this.operationString = fullExpression;
+            this.isResultDisplayed = true;
+            this.expression = [];
+            this.updateDisplay();
+        } catch (error) {
+            console.error('Calculation error:', error);
+            this.currentInput = "Error";
+            // Keep the original expression in the operator display
+            this.operatorDisplay.textContent = `${fullExpression} =`;
+            this.isResultDisplayed = true;
+            this.updateDisplay();
+        }
+    }
+
+    /**
+     * Evaluates expressions within parentheses
+     * @param {string} expression - The expression to evaluate
+     * @returns {string} - Expression with parentheses evaluated
+     */
+    evaluateParentheses(expression) {
+        while (expression.includes('(')) {
+            // Find the innermost parentheses
+            const lastOpen = expression.lastIndexOf('(');
+            const nextClose = expression.indexOf(')', lastOpen);
+            
+            if (nextClose === -1) {
+                throw new Error("Mismatched parentheses");
+            }
+            
+            // Extract and evaluate the expression within parentheses
+            const innerExpr = expression.substring(lastOpen + 1, nextClose);
+            // Treat empty parentheses as zero
+            const innerResult = innerExpr.trim() ? 
+                this.evaluateExpression(innerExpr) : 
+                0;
+            
+            // Replace the parenthetical expression with its result
+            expression = expression.substring(0, lastOpen) + 
+                        innerResult + 
+                        expression.substring(nextClose + 1);
+        }
+        return this.evaluateExpression(expression);
+    }
+
+    /**
+     * Evaluates a simple expression without parentheses
+     * @param {string} expression - The expression to evaluate
+     * @returns {number} - The result of the evaluation
+     */
+    evaluateExpression(expression) {
+        // Parse the expression into tokens
+        const tokens = expression.split(' ').filter(token => token !== '');
+
+        // First pass: handle multiplication and division
+        for (let i = 1; i < tokens.length - 1; i += 2) {
+            if (tokens[i] === '*' || tokens[i] === '/') {
+                const left = parseFloat(tokens[i - 1]);
+                const right = parseFloat(tokens[i + 1]);
+                let result;
+                
+                if (tokens[i] === '*') {
+                    result = left * right;
+                } else if (tokens[i] === '/' && right !== 0) {
+                    result = left / right;
+                } else {
+                    throw new Error("Division by zero");
+                }
+                
+                tokens.splice(i - 1, 3, result.toString());
+                i -= 2;
+            }
         }
 
-        this.isResultDisplayed = true;
-        this.operationString = fullOperation;
-        this.updateOperatorDisplay(fullOperation);
-        this.updateDisplay();
+        // Second pass: handle addition and subtraction
+        let result = parseFloat(tokens[0]);
+        for (let i = 1; i < tokens.length - 1; i += 2) {
+            const right = parseFloat(tokens[i + 1]);
+            if (tokens[i] === '+') {
+                result += right;
+            } else if (tokens[i] === '-') {
+                result -= right;
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -372,20 +388,15 @@
      */
     updateDisplay() {
         if (this.isResultDisplayed) {
-            // After equals: Show result in main display
             this.display.value = this.formatNumber(this.currentInput);
-            // Show full operation in top display
             this.operatorDisplay.textContent = `${this.operationString} =`;
         } else {
-            // During input: Show the operation string directly without number formatting
-            if (this.operation) {
-                // If we have an operation, show the full operation string
+            // Always show the operation string if it exists
+            if (this.operationString) {
                 this.display.value = this.operationString;
             } else {
-                // If no operation, format the current input as a number
                 this.display.value = this.formatNumber(this.currentInput || "0");
             }
-            // Keep top display empty during input
             this.operatorDisplay.textContent = "";
         }
     }
@@ -454,13 +465,10 @@
      */
     clear() {
         this.currentInput = "";
-        this.previousInput = "";
-        this.operation = null;
-        this.lastNumber = null;
-        this.lastOperation = null;
+        this.expression = [];
+        this.parenthesesCount = 0;
+        this.operationString = "";
         this.isResultDisplayed = false;
-        this.operationString = "";  // Clear the operation string
-        this.updateOperatorDisplay("");
         this.updateDisplay();
     }
 
@@ -535,6 +543,74 @@
         }
 
         this.updateDisplay();
+    }
+
+    /**
+     * Handles opening parenthesis
+     */
+    handleLeftParen() {
+        if (this.isResultDisplayed) {
+            this.clear();
+        }
+
+        // Add implicit multiplication if needed
+        if (this.currentInput) {
+            this.expression.push(this.currentInput);
+            this.expression.push("*");
+            this.currentInput = "";
+        }
+
+        this.expression.push("(");
+        this.parenthesesCount++;
+        
+        this.buildOperationString();
+        this.updateDisplay();
+    }
+
+    /**
+     * Handles closing parenthesis
+     */
+    handleRightParen() {
+        if (this.parenthesesCount <= 0) return;
+
+        if (this.currentInput) {
+            this.expression.push(this.currentInput);
+            this.currentInput = "";
+        }
+
+        this.expression.push(")");
+        this.parenthesesCount--;
+        
+        this.buildOperationString();
+        this.updateDisplay();
+    }
+
+    /**
+     * Build operation string from expression array
+     */
+    buildOperationString() {
+        // First join with spaces between all tokens
+        let str = this.expression.map(token => {
+            // Don't add spaces around parentheses
+            if (token === '(' || token === ')') {
+                return token;
+            }
+            // Add spaces around operators
+            if (['+', '-', '*', '/'].includes(token)) {
+                return ` ${token} `;
+            }
+            return token;
+        }).join('');
+        
+        // Clean up multiple spaces
+        str = str.replace(/\s+/g, ' ').trim();
+        
+        // Add current input
+        if (this.currentInput) {
+            str += str ? ` ${this.currentInput}` : this.currentInput;
+        }
+        
+        this.operationString = str;
     }
 }
 
