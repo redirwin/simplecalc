@@ -537,33 +537,29 @@
      * Otherwise removes the last entered digit or operator
      */
     handleDelete() {
-        // If showing a result, clear everything
+        // Handle result state
         if (this.isResultDisplayed) {
             this.clear();
             return;
         }
 
-        // If we have an operation in progress
-        if (this.operation) {
-            // If current input exists, delete from it
-            if (this.currentInput) {
-                this.currentInput = this.currentInput.slice(0, -1);
-                this.operationString = `${this.previousInput} ${this.operation} ${this.currentInput}`;
-            } 
-            // If current input is empty, remove the operator
-            else {
-                this.operation = null;
-                this.currentInput = this.previousInput;
-                this.previousInput = "";
-                this.operationString = this.currentInput;
-            }
-        } 
-        // If we're just dealing with currentInput
-        else {
+        // If we have a current input, delete from it first
+        if (this.currentInput) {
             this.currentInput = this.currentInput.slice(0, -1);
-            this.operationString = this.currentInput;
+        } 
+        // If no current input, remove the last item from expression array
+        else if (this.expression.length > 0) {
+            const lastToken = this.expression.pop();
+            // Update parentheses count when deleting parentheses
+            if (lastToken === '(') {
+                this.parenthesesCount--;
+            } else if (lastToken === ')') {
+                this.parenthesesCount++;
+            }
         }
 
+        // Rebuild the operation string
+        this.buildOperationString();
         this.updateDisplay();
     }
 
