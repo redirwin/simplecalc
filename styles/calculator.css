@@ -1,0 +1,141 @@
+/* Base styles for the calculator popup */
+body {
+    margin: 0;
+    padding: 10px;
+    width: 320px;
+    background-color: #f4f4f9;
+    font-family: Arial, sans-serif;
+}
+
+.calculator {
+    width: 100%;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+}
+
+.calculator-display {
+    width: 100%;
+    height: 70px;
+    background: #f1f1f1;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    padding: 5px 10px;
+    font-size: 1.5rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+#operator-display {
+    font-size: 1rem;
+    color: gray;
+    text-align: right;
+    height: 20px;
+    line-height: 20px;
+}
+
+#display {
+    font-size: 1.5rem;
+    text-align: right;
+    border: none;
+    background: none;
+    width: 100%;
+    box-sizing: border-box;
+    height: 40px;
+    padding: 0;
+    margin: 0;
+    outline: none;
+}
+
+.calculator-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.calculator-button {
+    height: 50px;
+    font-size: 1.2rem;
+    background: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
+}
+
+.calculator-button:hover {
+    filter: brightness(1.1);
+}
+
+.calculator-button:active {
+    background: #0056b3;
+}
+
+.calculator-button.decimal {
+    position: relative;
+}
+
+.calculator-button.decimal::before {
+    content: ".";
+    font-size: 1.2rem;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-60%);
+}
+
+.calculator-button.clear {
+    background: #e63946;
+}
+
+.calculator-button.clear:active {
+    background: #b02a36;
+}
+
+.calculator-button.equals {
+    background: #28a745;
+}
+
+.calculator-button.equals:active {
+    background: #1d7c32;
+}
+
+.calculator-button.special {
+    background: #6A5ACD;
+}
+
+.calculator-button.special:active {
+    background: #5A4AB0;
+}
+
+.calculator-button.operator {
+    background: #FFA500;
+}
+
+.calculator-button.operator:active {
+    background: #cc8400;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+@keyframes flashBorder {
+    0%, 100% { border-color: #ccc; }
+    50% { border-color: #e63946; }
+}
+
+.calculator-display.limit-exceeded {
+    animation: shake 0.2s ease-in-out, flashBorder 0.5s ease-in-out;
+}
