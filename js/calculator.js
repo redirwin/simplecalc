@@ -165,31 +165,36 @@
      * @param {string} op - The operation to set
      */
     setOperation(op) {
-        if (this.currentInput === "" && this.expression.length === 0) return;
-
-        // Handle operation after displaying a result
-        if (this.isResultDisplayed) {
-            // Use the current result as the start of new expression
-            this.expression = [this.currentInput];
-            this.previousInput = this.currentInput;
-            this.currentInput = "";
-            this.isResultDisplayed = false;
-            this.operatorDisplay.textContent = ""; // Clear secondary display
-        } else {
-            // Normal operation flow
-            if (this.currentInput) {
-                this.expression.push(this.currentInput);
-                this.currentInput = "";
-            }
+        // Special case: handle minus sign as negative number indicator only when:
+        // 1. It's the first input, or
+        // 2. It follows another operator
+        const lastToken = this.expression[this.expression.length - 1];
+        const isFirstInput = this.expression.length === 0 && this.currentInput === "";
+        const followsOperator = ['+', '-', '*', '/'].includes(lastToken);
+        
+        if (op === "-" && (isFirstInput || followsOperator)) {
+            this.currentInput = "-";
+            this.buildOperationString();
+            this.updateDisplay();
+            return;
         }
 
-        // Check if the last token is an operator
-        const lastToken = this.expression[this.expression.length - 1];
+        // Handle as regular operation
+        if (this.currentInput === "" && this.expression.length === 0) return;
+
+        if (this.isResultDisplayed) {
+            this.expression = [this.currentInput];
+            this.currentInput = "";
+            this.isResultDisplayed = false;
+        } else if (this.currentInput) {
+            this.expression.push(this.currentInput);
+            this.currentInput = "";
+        }
+
+        // Update operator
         if (['+', '-', '*', '/'].includes(lastToken)) {
-            // Replace the last operator
             this.expression[this.expression.length - 1] = op;
         } else {
-            // Add the new operator
             this.expression.push(op);
         }
         
@@ -316,33 +321,51 @@
         // Parse the expression into tokens
         const tokens = expression.split(' ').filter(token => token !== '');
 
+        // Handle negative numbers before tokenizing operations
+        const processedTokens = [];
+        for (let i = 0; i < tokens.length; i++) {
+            const token = tokens[i];
+            // If it's a minus sign followed by a number and either:
+            // 1. It's the first token, or
+            // 2. The previous token was an operator
+            if (token === '-' && 
+                i + 1 < tokens.length && 
+                !isNaN(tokens[i + 1]) && 
+                (i === 0 || ['+', '-', '*', '/'].includes(tokens[i - 1]))) {
+                processedTokens.push((-parseFloat(tokens[i + 1])).toString());
+                i++; // Skip the next token since we've processed it
+            } else {
+                processedTokens.push(token);
+            }
+        }
+
         // First pass: handle multiplication and division
-        for (let i = 1; i < tokens.length - 1; i += 2) {
-            if (tokens[i] === '*' || tokens[i] === '/') {
-                const left = parseFloat(tokens[i - 1]);
-                const right = parseFloat(tokens[i + 1]);
+        for (let i = 1; i < processedTokens.length - 1; i += 2) {
+            if (processedTokens[i] === '*' || processedTokens[i] === '/') {
+                const left = parseFloat(processedTokens[i - 1]);
+                const right = parseFloat(processedTokens[i + 1]);
                 let result;
                 
-                if (tokens[i] === '*') {
+                if (processedTokens[i] === '*') {
                     result = left * right;
-                } else if (tokens[i] === '/' && right !== 0) {
+                } else if (processedTokens[i] === '/' && right !== 0) {
                     result = left / right;
                 } else {
                     throw new Error("Division by zero");
                 }
                 
-                tokens.splice(i - 1, 3, result.toString());
+                processedTokens.splice(i - 1, 3, result.toString());
                 i -= 2;
             }
         }
 
-        // Rest of the evaluation logic remains the same...
-        let result = parseFloat(tokens[0]);
-        for (let i = 1; i < tokens.length - 1; i += 2) {
-            const right = parseFloat(tokens[i + 1]);
-            if (tokens[i] === '+') {
+        // Second pass: handle addition and subtraction
+        let result = parseFloat(processedTokens[0]);
+        for (let i = 1; i < processedTokens.length - 1; i += 2) {
+            const right = parseFloat(processedTokens[i + 1]);
+            if (processedTokens[i] === '+') {
                 result += right;
-            } else if (tokens[i] === '-') {
+            } else if (processedTokens[i] === '-') {
                 result -= right;
             }
         }
@@ -483,22 +506,17 @@
     toggleSign() {
         if (this.currentInput === "" || this.currentInput === "0") return;
 
-        // Add this block to handle result state
+        // If showing a result, treat it as a new starting number
         if (this.isResultDisplayed) {
-            // Clear previous operation display and start fresh
-            this.previousInput = "";
-            this.operation = null;
-            this.operationString = "";
+            this.expression = [];
             this.isResultDisplayed = false;
-            this.operatorDisplay.textContent = "";
         }
 
+        // Toggle the sign of current input
         this.currentInput = (parseFloat(this.currentInput) * -1).toString();
-        if (this.operation) {
-            this.operationString = `${this.previousInput} ${this.operation} ${this.currentInput}`;
-        } else {
-            this.operationString = this.currentInput;
-        }
+        
+        // Rebuild the operation string without changing the expression array
+        this.buildOperationString();
         this.updateDisplay();
     }
 
@@ -625,23 +643,18 @@
      * Build operation string from expression array
      */
     buildOperationString() {
-        // First join with spaces between all tokens
         let str = this.expression.map(token => {
-            // Don't add spaces around parentheses
             if (token === '(' || token === ')') {
                 return token;
             }
-            // Add spaces around operators
             if (['+', '-', '*', '/'].includes(token)) {
                 return ` ${token} `;
             }
             return token;
         }).join('');
         
-        // Clean up multiple spaces
         str = str.replace(/\s+/g, ' ').trim();
         
-        // Add current input
         if (this.currentInput) {
             str += str ? ` ${this.currentInput}` : this.currentInput;
         }
