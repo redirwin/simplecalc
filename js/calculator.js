@@ -156,11 +156,21 @@
     setOperation(op) {
         if (this.currentInput === "" && this.expression.length === 0) return;
 
+        // If we have a current input, add it to expression
         if (this.currentInput) {
             this.expression.push(this.currentInput);
             this.currentInput = "";
         }
-        this.expression.push(op);
+
+        // Check if the last token is an operator
+        const lastToken = this.expression[this.expression.length - 1];
+        if (['+', '-', '*', '/'].includes(lastToken)) {
+            // Replace the last operator
+            this.expression[this.expression.length - 1] = op;
+        } else {
+            // Add the new operator
+            this.expression.push(op);
+        }
         
         this.buildOperationString();
         this.updateDisplay();
