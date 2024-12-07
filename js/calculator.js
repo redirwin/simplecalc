@@ -187,25 +187,25 @@
     setOperation(op) {
         if (this.currentInput === "") return;
 
-        if (this.operation && this.previousInput && !this.isResultDisplayed) {
-            this.calculate();
-        }
-
-        // If we're starting from a displayed result, clear the secondary display
-        // and use the result as the start of a new operation
+        // If we're starting from a displayed result, use it as the first number
         if (this.isResultDisplayed) {
             this.previousInput = this.currentInput;
             this.operationString = `${this.currentInput} ${op}`;
-            this.isResultDisplayed = false;  // Switch back to operation building mode
-            this.operatorDisplay.textContent = "";  // Clear the secondary display
+            this.isResultDisplayed = false;
+            this.operatorDisplay.textContent = "";
         } else {
-            this.previousInput = this.currentInput;
+            // If we already have an operation in progress, store the new number
+            if (this.operation) {
+                this.previousInput = this.previousInput + " " + this.operation + " " + this.currentInput;
+            } else {
+                this.previousInput = this.currentInput;
+            }
             this.operationString = `${this.previousInput} ${op}`;
         }
 
         this.operation = op;
         this.currentInput = "";
-
+        
         this.updateDisplay();
     }
 
