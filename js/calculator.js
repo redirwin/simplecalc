@@ -8,6 +8,7 @@
         this.isResultDisplayed = false;
         this.lastNumber = null;
         this.lastOperation = null;
+        this.operationString = "";
 
         this.display = document.getElementById("display");
         this.operatorDisplay = document.getElementById("operator-display");
@@ -91,6 +92,13 @@
      * @param {string} number - The number to append
      */
     appendNumber(number) {
+        console.log("Before appendNumber:", {
+            currentInput: this.currentInput,
+            previousInput: this.previousInput,
+            operation: this.operation,
+            operationString: this.operationString
+        });
+
         if (this.isResultDisplayed) {
             this.currentInput = "";
             this.isResultDisplayed = false;
@@ -117,12 +125,26 @@
             return;
         }
 
-        // Replace single leading zero with new number
+        // Update currentInput
         if (this.currentInput === "0" && number !== ".") {
             this.currentInput = number;
         } else {
             this.currentInput += number;
         }
+
+        // Always update operationString when appending numbers
+        if (this.operation) {
+            this.operationString = `${this.previousInput} ${this.operation} ${this.currentInput}`;
+        } else {
+            this.operationString = this.currentInput;
+        }
+
+        console.log("After appendNumber:", {
+            currentInput: this.currentInput,
+            previousInput: this.previousInput,
+            operation: this.operation,
+            operationString: this.operationString
+        });
 
         this.updateDisplay();
     }
@@ -153,28 +175,28 @@
      * @param {string} op - The operation to set
      */
     setOperation(op) {
-        if (this.currentInput === "" && this.previousInput === "") return;
+        if (this.currentInput === "") return;
 
-        if (this.currentInput === "" && this.previousInput !== "") {
-            this.operation = op;
-            this.updateOperatorDisplay(op);
-            return;
-        }
-
-        if (this.operation !== null) {
+        if (this.operation && this.previousInput && !this.isResultDisplayed) {
             this.calculate();
         }
 
-        this.operation = op;
+        // If we're starting from a displayed result, clear the secondary display
+        // and use the result as the start of a new operation
         if (this.isResultDisplayed) {
             this.previousInput = this.currentInput;
-            this.currentInput = "";
-            this.isResultDisplayed = false;
-        } else if (this.currentInput !== "") {
+            this.operationString = `${this.currentInput} ${op}`;
+            this.isResultDisplayed = false;  // Switch back to operation building mode
+            this.operatorDisplay.textContent = "";  // Clear the secondary display
+        } else {
             this.previousInput = this.currentInput;
-            this.currentInput = "";
+            this.operationString = `${this.previousInput} ${op}`;
         }
-        this.updateOperatorDisplay(op);
+
+        this.operation = op;
+        this.currentInput = "";
+        
+        this.updateDisplay();
     }
 
     /**
@@ -182,7 +204,14 @@
      * @param {string} op - The operation to display
      */
     updateOperatorDisplay(op) {
-        this.operatorDisplay.textContent = op;
+        if (this.isResultDisplayed) {
+            this.operatorDisplay.textContent = `${this.operationString} =`;
+        } else if (this.operation) {
+            // Show the full operation string in the operator display
+            this.operatorDisplay.textContent = this.operationString;
+        } else {
+            this.operatorDisplay.textContent = "";
+        }
     }
 
     /**
@@ -217,6 +246,9 @@
     calculate() {
         if (!this.operation || !this.previousInput || this.currentInput === "") return;
 
+        const fullOperation = `${this.previousInput} ${this.operation} ${this.currentInput}`;
+        
+        // Perform calculation
         let result;
         const prev = parseFloat(this.previousInput);
         const current = parseFloat(this.currentInput);
@@ -240,18 +272,15 @@
 
         if (result === "Error") {
             this.currentInput = "Error";
-            this.previousInput = "";
+            this.operationString = "Error";
         } else {
-            // Format the result to prevent excessive decimal places
             this.currentInput = this.formatCalculationResult(result);
-            this.previousInput = "";
+            this.operationString = fullOperation;
         }
-        
-        this.lastNumber = this.currentInput;
-        this.lastOperation = this.operation;
-        this.operation = null;
+
         this.isResultDisplayed = true;
-        this.updateOperatorDisplay("");
+        this.operationString = fullOperation;
+        this.updateOperatorDisplay(fullOperation);
         this.updateDisplay();
     }
 
@@ -290,10 +319,12 @@
         if (this.currentInput === "") return;
         const value = parseFloat(this.currentInput);
         if (value < 0) {
-            this.display.value = "Error";
-            return;
+            this.currentInput = "Error";
+            this.operationString = "Error";
+        } else {
+            this.operationString = `√(${this.currentInput})`;
+            this.currentInput = Math.sqrt(value).toString();
         }
-        this.currentInput = Math.sqrt(value).toString();
         this.isResultDisplayed = true;
         this.updateOperatorDisplay("");
         this.updateDisplay();
@@ -304,6 +335,7 @@
      */
     calculateSquare() {
         if (this.currentInput === "") return;
+        this.operationString = `(${this.currentInput})²`;
         this.currentInput = Math.pow(parseFloat(this.currentInput), 2).toString();
         this.isResultDisplayed = true;
         this.updateOperatorDisplay("");
@@ -320,15 +352,32 @@
         this.lastNumber = null;
         this.lastOperation = null;
         this.isResultDisplayed = false;
+        this.operationString = "";  // Clear the operation string
         this.updateOperatorDisplay("");
         this.updateDisplay();
     }
 
     /**
-     * Update the calculator display
+     * Updates the display with current operation or result
      */
     updateDisplay() {
-        this.display.value = this.formatNumber(this.currentInput);
+        if (this.isResultDisplayed) {
+            // After equals: Show result in main display
+            this.display.value = this.formatNumber(this.currentInput);
+            // Show full operation in top display
+            this.operatorDisplay.textContent = `${this.operationString} =`;
+        } else {
+            // During input: Show the operation string directly without number formatting
+            if (this.operation) {
+                // If we have an operation, show the full operation string
+                this.display.value = this.operationString;
+            } else {
+                // If no operation, format the current input as a number
+                this.display.value = this.formatNumber(this.currentInput || "0");
+            }
+            // Keep top display empty during input
+            this.operatorDisplay.textContent = "";
+        }
     }
 
     /**
@@ -369,14 +418,13 @@
      * Toggles the sign of the current input between positive and negative
      */
     toggleSign() {
-        if (this.currentInput === "") return;
-        
-        if (this.currentInput.startsWith("-")) {
-            this.currentInput = this.currentInput.slice(1);
+        if (this.currentInput === "" || this.currentInput === "0") return;
+        this.currentInput = (parseFloat(this.currentInput) * -1).toString();
+        if (this.operation) {
+            this.operationString = `${this.previousInput} ${this.operation} ${this.currentInput}`;
         } else {
-            this.currentInput = "-" + this.currentInput;
+            this.operationString = this.currentInput;
         }
-        
         this.updateDisplay();
     }
 
@@ -390,7 +438,48 @@
         this.lastNumber = null;
         this.lastOperation = null;
         this.isResultDisplayed = false;
+        this.operationString = "";  // Clear the operation string
         this.updateOperatorDisplay("");
+        this.updateDisplay();
+    }
+
+    /**
+     * Handles number input
+     * @param {string} num - The number pressed
+     */
+    handleNumber(num) {
+        console.log("Before handleNumber:", {
+            currentInput: this.currentInput,
+            previousInput: this.previousInput,
+            operation: this.operation,
+            operationString: this.operationString
+        });
+
+        if (this.isResultDisplayed) {
+            this.currentInput = num;
+            this.isResultDisplayed = false;
+            this.operationString = num;
+        } else {
+            if (this.currentInput === "0" && num !== ".") {
+                this.currentInput = num;
+            } else {
+                this.currentInput += num;
+            }
+            
+            if (this.operation) {
+                this.operationString = `${this.previousInput} ${this.operation} ${this.currentInput}`;
+            } else {
+                this.operationString = this.currentInput;
+            }
+        }
+
+        console.log("After handleNumber:", {
+            currentInput: this.currentInput,
+            previousInput: this.previousInput,
+            operation: this.operation,
+            operationString: this.operationString
+        });
+        
         this.updateDisplay();
     }
 }

@@ -23,6 +23,7 @@ A lightweight, efficient calculator extension for Chrome that provides essential
 
 - Click the extension icon in Chrome to open the calculator
 - Use mouse or keyboard for input
+- Chain multiple operations using the result of previous calculations
 - Supports keyboard shortcuts:
   - Numbers (0-9)
   - Operators (+, -, *, /)
