@@ -111,17 +111,28 @@
             this.clear();
         }
 
-        // Handle digit limits
-        if (this.currentInput.length >= this.MAX_DIGITS) {
-            this.showLimitExceededFeedback();
-            return;
-        }
-
-        // Update currentInput
-        if (this.currentInput === "0" && number !== ".") {
+        // Check for implicit multiplication after closing parenthesis
+        if (this.expression.length > 0 && 
+            this.expression[this.expression.length - 1] === ')') {
+            
+            if (this.currentInput) {
+                this.expression.push(this.currentInput);
+            }
+            this.expression.push('*');
             this.currentInput = number;
         } else {
-            this.currentInput += number;
+            // Handle digit limits
+            if (this.currentInput.length >= this.MAX_DIGITS) {
+                this.showLimitExceededFeedback();
+                return;
+            }
+
+            // Update currentInput
+            if (this.currentInput === "0" && number !== ".") {
+                this.currentInput = number;
+            } else {
+                this.currentInput += number;
+            }
         }
 
         this.buildOperationString();
@@ -279,10 +290,16 @@
                 this.evaluateExpression(innerExpr) : 
                 0;
             
+            // Check for implicit multiplication after the closing parenthesis
+            const afterClose = nextClose + 1;
+            const followingChar = expression.charAt(afterClose);
+            const needsMultiplication = /[0-9]/.test(followingChar);
+            
             // Replace the parenthetical expression with its result
             expression = expression.substring(0, lastOpen) + 
                         innerResult + 
-                        expression.substring(nextClose + 1);
+                        (needsMultiplication ? ' * ' : '') +
+                        expression.substring(afterClose);
         }
         return this.evaluateExpression(expression);
     }
@@ -293,6 +310,9 @@
      * @returns {number} - The result of the evaluation
      */
     evaluateExpression(expression) {
+        // Handle potential lack of spaces around operators
+        expression = expression.replace(/([+\-*/])/g, ' $1 ');
+        
         // Parse the expression into tokens
         const tokens = expression.split(' ').filter(token => token !== '');
 
@@ -316,7 +336,7 @@
             }
         }
 
-        // Second pass: handle addition and subtraction
+        // Rest of the evaluation logic remains the same...
         let result = parseFloat(tokens[0]);
         for (let i = 1; i < tokens.length - 1; i += 2) {
             const right = parseFloat(tokens[i + 1]);
@@ -499,35 +519,33 @@
      * @param {string} num - The number pressed
      */
     handleNumber(num) {
-        console.log("Before handleNumber:", {
-            currentInput: this.currentInput,
-            previousInput: this.previousInput,
-            operation: this.operation,
-            operationString: this.operationString
-        });
-
         if (this.isResultDisplayed) {
-            // Clear all previous operation state when starting fresh
-            this.currentInput = num;
-            this.previousInput = "";
-            this.operation = null;
-            this.isResultDisplayed = false;
-            this.operationString = num;
-            this.operatorDisplay.textContent = ""; // Clear the secondary display
-        } else {
-            if (this.currentInput === "0" && num !== ".") {
-                this.currentInput = num;
-            } else {
-                this.currentInput += num;
-            }
-
-            if (this.operation) {
-                this.operationString = `${this.previousInput} ${this.operation} ${this.currentInput}`;
-            } else {
-                this.operationString = this.currentInput;
-            }
+            this.clear();
         }
 
+        // Check for implicit multiplication after closing parenthesis
+        if (this.expression.length > 0 && 
+            this.expression[this.expression.length - 1] === ')' && 
+            !this.currentInput) {
+            
+            // Add the current expression to array
+            this.expression.push('*');
+        }
+
+        // Handle digit limits
+        if (this.currentInput.length >= this.MAX_DIGITS) {
+            this.showLimitExceededFeedback();
+            return;
+        }
+
+        // Update currentInput
+        if (this.currentInput === "0" && num !== ".") {
+            this.currentInput = num;
+        } else {
+            this.currentInput += num;
+        }
+
+        this.buildOperationString();
         this.updateDisplay();
     }
 
