@@ -156,10 +156,20 @@
     setOperation(op) {
         if (this.currentInput === "" && this.expression.length === 0) return;
 
-        // If we have a current input, add it to expression
-        if (this.currentInput) {
-            this.expression.push(this.currentInput);
+        // Handle operation after displaying a result
+        if (this.isResultDisplayed) {
+            // Use the current result as the start of new expression
+            this.expression = [this.currentInput];
+            this.previousInput = this.currentInput;
             this.currentInput = "";
+            this.isResultDisplayed = false;
+            this.operatorDisplay.textContent = ""; // Clear secondary display
+        } else {
+            // Normal operation flow
+            if (this.currentInput) {
+                this.expression.push(this.currentInput);
+                this.currentInput = "";
+            }
         }
 
         // Check if the last token is an operator
