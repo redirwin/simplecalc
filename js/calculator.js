@@ -363,14 +363,16 @@
      */
     calculateSquareRoot() {
         if (this.currentInput === "") return;
+        
         const value = parseFloat(this.currentInput);
+        this.operationString = `√(${this.currentInput})`;
+        
         if (value < 0) {
             this.currentInput = "Error";
-            this.operationString = "Error";
         } else {
-            this.operationString = `√(${this.currentInput})`;
             this.currentInput = Math.sqrt(value).toString();
         }
+        
         this.isResultDisplayed = true;
         this.updateOperatorDisplay("");
         this.updateDisplay();
