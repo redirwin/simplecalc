@@ -100,8 +100,13 @@
         });
 
         if (this.isResultDisplayed) {
+            // Clear everything and start fresh when typing a new number after a result
             this.currentInput = "";
+            this.previousInput = "";
+            this.operation = null;
+            this.operationString = "";
             this.isResultDisplayed = false;
+            this.operatorDisplay.textContent = "";
         }
 
         // Handle single input of long number
@@ -132,7 +137,7 @@
             this.currentInput += number;
         }
 
-        // Always update operationString when appending numbers
+        // Update operation string based on current state
         if (this.operation) {
             this.operationString = `${this.previousInput} ${this.operation} ${this.currentInput}`;
         } else {
@@ -157,12 +162,12 @@
             this.currentInput = "0";
             this.isResultDisplayed = false;
         }
-        
+
         // If empty, start with "0."
         if (this.currentInput === "") {
             this.currentInput = "0";
         }
-        
+
         // Only add decimal if one doesn't exist
         if (!this.currentInput.includes('.')) {
             this.currentInput += '.';
@@ -195,7 +200,7 @@
 
         this.operation = op;
         this.currentInput = "";
-        
+
         this.updateDisplay();
     }
 
@@ -222,13 +227,13 @@
     roundResult(value) {
         const num = Number(value);
         if (isNaN(num)) return value;
-        
+
         // Handle decimal precision
         const absNum = Math.abs(num);
         if (absNum < 1) {
             return Number(num.toPrecision(12));
         }
-        
+
         const decimalStr = num.toString();
         if (decimalStr.includes('.')) {
             const [integer, decimal] = decimalStr.split('.');
@@ -236,7 +241,7 @@
                 return Number(num.toFixed(12));
             }
         }
-        
+
         return num;
     }
 
@@ -247,7 +252,7 @@
         if (!this.operation || !this.previousInput || this.currentInput === "") return;
 
         const fullOperation = `${this.previousInput} ${this.operation} ${this.currentInput}`;
-        
+
         // Perform calculation
         let result;
         const prev = parseFloat(this.previousInput);
@@ -293,7 +298,7 @@
         if (Math.abs(result) >= 1e12) {
             return result.toExponential(6);
         }
-        
+
         // Convert to string with fixed decimal places to avoid floating point issues
         const resultString = result.toFixed(12);
         // Remove trailing zeros after decimal point
@@ -305,7 +310,7 @@
      */
     repeatOperation() {
         if (this.lastNumber === null || this.operation === null) return;
-        
+
         const current = parseFloat(this.currentInput || this.previousInput);
         this.previousInput = current.toString();
         this.currentInput = "";
@@ -419,6 +424,17 @@
      */
     toggleSign() {
         if (this.currentInput === "" || this.currentInput === "0") return;
+
+        // Add this block to handle result state
+        if (this.isResultDisplayed) {
+            // Clear previous operation display and start fresh
+            this.previousInput = "";
+            this.operation = null;
+            this.operationString = "";
+            this.isResultDisplayed = false;
+            this.operatorDisplay.textContent = "";
+        }
+
         this.currentInput = (parseFloat(this.currentInput) * -1).toString();
         if (this.operation) {
             this.operationString = `${this.previousInput} ${this.operation} ${this.currentInput}`;
@@ -456,16 +472,20 @@
         });
 
         if (this.isResultDisplayed) {
+            // Clear all previous operation state when starting fresh
             this.currentInput = num;
+            this.previousInput = "";
+            this.operation = null;
             this.isResultDisplayed = false;
             this.operationString = num;
+            this.operatorDisplay.textContent = ""; // Clear the secondary display
         } else {
             if (this.currentInput === "0" && num !== ".") {
                 this.currentInput = num;
             } else {
                 this.currentInput += num;
             }
-            
+
             if (this.operation) {
                 this.operationString = `${this.previousInput} ${this.operation} ${this.currentInput}`;
             } else {
@@ -473,13 +493,6 @@
             }
         }
 
-        console.log("After handleNumber:", {
-            currentInput: this.currentInput,
-            previousInput: this.previousInput,
-            operation: this.operation,
-            operationString: this.operationString
-        });
-        
         this.updateDisplay();
     }
 }
