@@ -57,6 +57,8 @@
             this.calculate();
         } else if (e.key === "Escape") {
             this.clear();
+        } else if (e.key === "Backspace" || e.key === "Delete") {
+            this.handleDelete();
         }
     }
 
@@ -66,6 +68,9 @@
      */
     handleAction(action) {
         switch (action) {
+            case "delete":
+                this.handleDelete();
+                break;
             case "sqrt":
                 this.calculateSquareRoot();
                 break;
@@ -491,6 +496,42 @@
             } else {
                 this.operationString = this.currentInput;
             }
+        }
+
+        this.updateDisplay();
+    }
+
+    /**
+     * Handles deletion of the last entered character
+     * If displaying a result, clears the calculator
+     * Otherwise removes the last entered digit or operator
+     */
+    handleDelete() {
+        // If showing a result, clear everything
+        if (this.isResultDisplayed) {
+            this.clear();
+            return;
+        }
+
+        // If we have an operation in progress
+        if (this.operation) {
+            // If current input exists, delete from it
+            if (this.currentInput) {
+                this.currentInput = this.currentInput.slice(0, -1);
+                this.operationString = `${this.previousInput} ${this.operation} ${this.currentInput}`;
+            } 
+            // If current input is empty, remove the operator
+            else {
+                this.operation = null;
+                this.currentInput = this.previousInput;
+                this.previousInput = "";
+                this.operationString = this.currentInput;
+            }
+        } 
+        // If we're just dealing with currentInput
+        else {
+            this.currentInput = this.currentInput.slice(0, -1);
+            this.operationString = this.currentInput;
         }
 
         this.updateDisplay();

@@ -14,6 +14,7 @@ body {
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     box-sizing: border-box;
+    min-height: 450px;
 }
 
 .calculator-display {
@@ -138,4 +139,18 @@ body {
 
 .calculator-display.limit-exceeded {
     animation: shake 0.2s ease-in-out, flashBorder 0.5s ease-in-out;
+}
+
+/* Style for delete button */
+.calculator-button[data-action="delete"] {
+    background: #e63946;
+    font-size: 1rem;
+}
+
+/* Style for parentheses and percent */
+.calculator-button[data-action="leftParen"],
+.calculator-button[data-action="rightParen"],
+.calculator-button[data-action="percent"] {
+    background: #6A5ACD;
+    font-size: 1.2rem;
 }
