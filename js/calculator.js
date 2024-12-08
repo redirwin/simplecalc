@@ -41,6 +41,26 @@
 
         this.initializeEventListeners();
         this.initializeTooltips();
+
+        // Initialize utility panels
+        this.initializeUtilityPanels();
+
+        this.activePanel = null; // Track currently open panel
+        
+        // Update history button event listener to use togglePanel
+        document.querySelector("[data-action='history']").addEventListener("click", () => {
+            this.togglePanel("history");
+        });
+
+        // Update history close button
+        document.querySelector(".history-close").addEventListener("click", () => {
+            this.togglePanel("history");
+        });
+
+        // Update history overlay
+        document.querySelector(".history-overlay").addEventListener("click", () => {
+            this.togglePanel("history");
+        });
     }
 
     /**
@@ -112,13 +132,17 @@
     }
 
     /**
-     * Handle keyboard input
-     * @param {KeyboardEvent} e - Keyboard event
+     * Handles keyboard input
+     * @param {KeyboardEvent} e - The keyboard event
      */
     handleKeyboardInput(e) {
-        // Skip keyboard handling if history panel is open
-        const historyPanel = document.querySelector(".history-panel");
-        if (historyPanel.classList.contains('open')) return;
+        // Special keys that should work even when panels are open
+        if (e.key === "F1" || e.key === "F2" || e.key.toLowerCase() === "h" || e.key === "Escape") {
+            return; // Let these events bubble up to the panel handlers
+        }
+
+        // Skip other keyboard handling if any panel is open
+        if (this.activePanel) return;
 
         // Skip Space when focus is on calculator button
         if (e.target.classList.contains('calculator-button') && e.key === " ") {
@@ -175,7 +199,8 @@
         } else if (e.key === "!") {
             this.handleAction("toggleSign");
         } else if (e.key.toLowerCase() === "h") {
-            this.handleAction("history");
+            e.preventDefault();
+            this.togglePanel("history");
         }
     }
 
@@ -1080,52 +1105,14 @@
      * Opens history panel and sets up focus management
      */
     openHistoryPanel() {
-        const historyPanel = document.querySelector(".history-panel");
-        const historyOverlay = document.querySelector(".history-overlay");
-        const historyButton = document.querySelector("[data-action='history']");
-        
-        // Store last focused element before opening panel
-        this.lastFocusedElement = document.activeElement;
-        
-        historyPanel.classList.add("open");
-        historyOverlay.classList.add("show");
-        historyButton.classList.add("active");
-
-        // Make history elements tabbable when panel is open
-        const historyElements = historyPanel.querySelectorAll('button, [tabindex="-1"]');
-        historyElements.forEach(element => {
-            element.setAttribute('tabindex', '0');
-        });
-
-        // Set focus to first history entry or clear button
-        const firstFocusable = historyPanel.querySelector('.history-entry, .history-clear');
-        if (firstFocusable) {
-            firstFocusable.focus();
-        }
+        this.togglePanel("history");
     }
 
     /**
      * Close history panel and restore focus
      */
     closeHistoryPanel() {
-        const historyPanel = document.querySelector(".history-panel");
-        const historyOverlay = document.querySelector(".history-overlay");
-        const historyButton = document.querySelector("[data-action='history']");
-        
-        // Make history elements non-tabbable when panel is closed
-        const historyElements = historyPanel.querySelectorAll('button, [tabindex="0"]');
-        historyElements.forEach(element => {
-            element.setAttribute('tabindex', '-1');
-        });
-
-        historyPanel.classList.remove("open");
-        historyOverlay.classList.remove("show");
-        historyButton.classList.remove("active");
-
-        // Restore focus to last focused element
-        if (this.lastFocusedElement) {
-            this.lastFocusedElement.focus();
-        }
+        this.togglePanel("history");
     }
 
     /**
@@ -1274,6 +1261,116 @@
         this.expression = [];
         this.parenthesesCount = 0;
         this.updateDisplay();
+    }
+
+    /**
+     * Initialize utility panels and their event listeners
+     */
+    initializeUtilityPanels() {
+        // Info panel
+        document.querySelector(".info-button").addEventListener("click", () => {
+            this.togglePanel("info");
+        });
+        
+        document.querySelector(".info-close").addEventListener("click", () => {
+            this.togglePanel("info");
+        });
+        
+        document.querySelector(".info-overlay").addEventListener("click", () => {
+            this.togglePanel("info");
+        });
+
+        // About panel
+        document.querySelector(".about-button").addEventListener("click", () => {
+            this.togglePanel("about");
+        });
+        
+        document.querySelector(".about-close").addEventListener("click", () => {
+            this.togglePanel("about");
+        });
+        
+        document.querySelector(".about-overlay").addEventListener("click", () => {
+            this.togglePanel("about");
+        });
+
+        // History panel
+        document.querySelector("[data-action='history']").addEventListener("click", () => {
+            this.togglePanel("history");
+        });
+        
+        document.querySelector(".history-close").addEventListener("click", () => {
+            this.togglePanel("history");
+        });
+        
+        document.querySelector(".history-overlay").addEventListener("click", () => {
+            this.togglePanel("history");
+        });
+
+        // Add keyboard shortcuts
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "F1") {
+                e.preventDefault();
+                this.togglePanel("info");
+            } else if (e.key === "F2") {
+                e.preventDefault();
+                this.togglePanel("about");
+            } else if (e.key.toLowerCase() === "h") {  // Handle both upper and lowercase H
+                e.preventDefault();
+                this.togglePanel("history");
+            } else if (e.key === "Escape") {
+                // Check if any panel is open
+                const infoOpen = document.querySelector(".info-panel.open");
+                const aboutOpen = document.querySelector(".about-panel.open");
+                const historyOpen = document.querySelector(".history-panel.open");
+                
+                if (infoOpen || aboutOpen || historyOpen) {
+                    e.preventDefault(); // Prevent extension popup from closing
+                    if (this.activePanel) {
+                        this.togglePanel(this.activePanel);
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Toggle utility panel visibility with proper sequencing
+     * @param {string} panelType - Type of panel ("info", "about", or "history")
+     */
+    togglePanel(panelType) {
+        const panel = document.querySelector(`.${panelType}-panel`);
+        const overlay = document.querySelector(`.${panelType}-overlay`);
+        const isOpen = panel.classList.contains("open");
+
+        // If we're trying to open a new panel while another is open
+        if (!isOpen && this.activePanel && this.activePanel !== panelType) {
+            // Close the currently active panel first
+            const activePanel = document.querySelector(`.${this.activePanel}-panel`);
+            const activeOverlay = document.querySelector(`.${this.activePanel}-overlay`);
+            
+            activePanel.classList.remove("open");
+            activeOverlay.classList.remove("show");
+            
+            // Wait for close animation to complete before opening new panel
+            setTimeout(() => {
+                panel.classList.add("open");
+                overlay.classList.add("show");
+                this.activePanel = panelType;
+            }, 300); // Match the CSS transition duration
+        } else {
+            // Normal toggle behavior when no other panel is open
+            if (isOpen) {
+                panel.classList.remove("open");
+                overlay.classList.remove("show");
+                this.activePanel = null;
+                // Return focus to calculator
+                document.querySelector(".calculator-button[data-number='0']").focus();
+            } else {
+                panel.classList.add("open");
+                overlay.classList.add("show");
+                this.activePanel = panelType;
+            }
+        }
     }
 }
 

@@ -53,6 +53,11 @@ A lightweight, efficient calculator extension for Chrome that provides essential
     - Calculate (Enter or =)
     - Clear (Escape)
     - Delete (Backspace or Delete)
+  - Panels:
+    - History panel toggle: (h/H)
+    - Help panel toggle: (F1)
+    - About panel toggle: (F2)
+    - Close active panel: (Esc)
 
 ### Display Features
 - Main display with automatic horizontal scrolling

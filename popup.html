@@ -14,7 +14,10 @@
         </div>
         <div class="calculator-buttons">
             <!-- Top row - History/Edit Functions -->
-            <button class="calculator-button special" data-action="history">H</button>
+            <button class="calculator-button special" 
+                    data-action="history" 
+                    aria-label="History (Press H)"
+                    data-shortcut="H">H</button>
             <button class="calculator-button special" data-action="delete">←</button>
             <button class="calculator-button special" data-action="parenthesis">( )</button>
             <button class="calculator-button special" data-action="percent">%</button>
@@ -48,9 +51,14 @@
             <button class="calculator-button equals" data-action="calculate">=</button>
         </div>
         <div class="calculator-utilities">
-            <button class="info-button" aria-label="Information and Help">?</button>
-            <button class="about-button" aria-label="About Calculator">@</button>
-            <!-- Space for additional utility buttons/links -->
+            <button class="info-button" 
+                    aria-label="Information and Help (Press F1)" 
+                    data-shortcut="F1"
+                    tabindex="-1">?</button>
+            <button class="about-button" 
+                    aria-label="About Calculator (Press F2)" 
+                    data-shortcut="F2"
+                    tabindex="-1">@</button>
         </div>
     </div>
     <div class="history-panel">
@@ -72,7 +80,7 @@
             <button class="info-close" aria-label="Close Information">×</button>
         </div>
         <div class="info-content">
-            <!-- Content will be added here -->
+            <!-- Help content will be added here -->
         </div>
     </div>
     <div class="info-overlay"></div>
@@ -82,7 +90,7 @@
             <button class="about-close" aria-label="Close About">×</button>
         </div>
         <div class="about-content">
-            <!-- Content will be added here -->
+            <!-- About content will be added here -->
         </div>
     </div>
     <div class="about-overlay"></div>
