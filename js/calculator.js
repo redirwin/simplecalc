@@ -93,11 +93,8 @@
             case "toggleSign":
                 this.toggleSign();
                 break;
-            case "leftParen":
-                this.handleLeftParen();
-                break;
-            case "rightParen":
-                this.handleRightParen();
+            case "parenthesis":
+                this.handleParenthesis();
                 break;
         }
     }
@@ -413,7 +410,7 @@
      */
     calculateSquare() {
         if (this.currentInput === "") return;
-        this.operationString = `(${this.currentInput})²`;
+        this.operationString = `(${this.currentInput})��`;
         this.currentInput = Math.pow(parseFloat(this.currentInput), 2).toString();
         this.isResultDisplayed = true;
         this.updateOperatorDisplay("");
@@ -587,40 +584,45 @@
     }
 
     /**
-     * Handles opening parenthesis
+     * Handles context-aware parenthesis insertion
      */
-    handleLeftParen() {
+    handleParenthesis() {
         if (this.isResultDisplayed) {
             this.clear();
         }
 
-        // Add implicit multiplication if needed
-        if (this.currentInput) {
-            this.expression.push(this.currentInput);
-            this.expression.push("*");
-            this.currentInput = "";
+        // Determine if we should close a parenthesis
+        const shouldClose = 
+            // Must have open parentheses
+            this.parenthesesCount > 0 && 
+            // Must have either current input or last token isn't an operator or opening parenthesis
+            (this.currentInput || 
+             (this.expression.length > 0 && 
+              !['+', '-', '*', '/', '('].includes(this.expression[this.expression.length - 1])));
+
+        if (shouldClose) {
+            // Add current input to expression if it exists
+            if (this.currentInput) {
+                this.expression.push(this.currentInput);
+                this.currentInput = "";
+            }
+            this.expression.push(")");
+            this.parenthesesCount--;
+        } else {
+            // Handle opening parenthesis
+            // Add implicit multiplication only if there's a number or closing parenthesis before
+            if (this.currentInput || 
+                (this.expression.length > 0 && 
+                 this.expression[this.expression.length - 1] === ')')) {
+                if (this.currentInput) {
+                    this.expression.push(this.currentInput);
+                }
+                this.expression.push("*");
+                this.currentInput = "";
+            }
+            this.expression.push("(");
+            this.parenthesesCount++;
         }
-
-        this.expression.push("(");
-        this.parenthesesCount++;
-        
-        this.buildOperationString();
-        this.updateDisplay();
-    }
-
-    /**
-     * Handles closing parenthesis
-     */
-    handleRightParen() {
-        if (this.parenthesesCount <= 0) return;
-
-        if (this.currentInput) {
-            this.expression.push(this.currentInput);
-            this.currentInput = "";
-        }
-
-        this.expression.push(")");
-        this.parenthesesCount--;
         
         this.buildOperationString();
         this.updateDisplay();
