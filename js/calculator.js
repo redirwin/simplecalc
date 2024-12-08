@@ -1210,49 +1210,55 @@
      * @returns {string} - Formatted expression
      */
     formatOperatorDisplay(expression) {
-        return expression.replace(/\//g, '÷').replace(/\*/g, '��');
+        return expression.replace(/\//g, '÷').replace(/\*/g, '×');
     }
 
     /**
-     * Initialize tooltips for calculator buttons
+     * Initialize accessibility labels for calculator buttons
      */
     initializeTooltips() {
-        const tooltips = {
-            'history': 'History (H)',
-            'delete': 'Backspace',
-            'parenthesis': '( or )',
-            'percent': '%',
-            'sqrt': 'Square Root (R)',
-            'square': 'Square (S)',
-            'toggleSign': 'Toggle Sign (!)',
-            'clear': 'Clear (Esc)',
-            'calculate': 'Calculate (Enter or =)',
-            'decimal': 'Decimal (.)'
+        const ariaLabels = {
+            'history': 'History (Press H)',
+            'delete': 'Backspace to delete',
+            'parenthesis': 'Parenthesis (Press ( or ))',
+            'percent': 'Percentage (Press %)',
+            'sqrt': 'Square Root (Press R)',
+            'square': 'Square (Press S)',
+            'toggleSign': 'Toggle Sign (Press !)',
+            'clear': 'Clear All (Press Escape)',
+            'calculate': 'Calculate (Press Enter or =)',
+            'decimal': 'Decimal Point (Press .)'
         };
 
-        const operatorTooltips = {
-            '+': 'Add (+)',
-            '-': 'Subtract (-)',
-            '*': 'Multiply (*)',
-            '/': 'Divide (/)'
+        const operatorLabels = {
+            '+': 'Add (Press +)',
+            '-': 'Subtract (Press -)',
+            '*': 'Multiply (Press *)',
+            '/': 'Divide (Press /)'
         };
 
+        // Set aria-labels for calculator buttons
         document.querySelectorAll('.calculator-button').forEach(button => {
-            let tooltip = '';
+            let label = '';
             
             if (button.dataset.action) {
-                tooltip = tooltips[button.dataset.action] || '';
+                label = ariaLabels[button.dataset.action] || '';
             } else if (button.dataset.operation) {
-                tooltip = operatorTooltips[button.dataset.operation] || '';
+                label = operatorLabels[button.dataset.operation] || '';
             } else if (button.dataset.number) {
-                tooltip = `Number (${button.dataset.number})`;
+                label = `Number ${button.dataset.number} (Press ${button.dataset.number})`;
             }
 
-            if (tooltip) {
-                button.setAttribute('title', tooltip);
-                button.setAttribute('aria-label', tooltip);
+            if (label) {
+                button.setAttribute('aria-label', label);
+                button.setAttribute('role', 'button');
+                button.removeAttribute('title'); // Remove title to prevent duplicate tooltips
             }
         });
+
+        // Set aria-labels for utility buttons
+        document.querySelector('.info-button').setAttribute('aria-label', 'Information and Help (Press F1)');
+        document.querySelector('.about-button').setAttribute('aria-label', 'About Calculator (Press F2)');
     }
 
     /**

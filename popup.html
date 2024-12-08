@@ -46,30 +46,35 @@
 
             <!-- Bottom row -->
             <button class="calculator-button" data-number="0">0</button>
-            <button class="calculator-button decimal" data-action="decimal">.</button>
+            <button class="calculator-button decimal" 
+                    data-action="decimal"
+                    aria-label="Decimal Point (Press .)"
+                    role="button">.</button>
             <button class="calculator-button clear" data-action="clear">C</button>
             <button class="calculator-button equals" data-action="calculate">=</button>
         </div>
         <div class="calculator-utilities">
             <button class="info-button" 
-                    aria-label="Information and Help (Press F1)" 
-                    data-shortcut="F1"
-                    tabindex="-1">?</button>
+                    aria-label="Information (Press F1)"
+                    title="Information (F1)">?</button>
             <button class="about-button" 
-                    aria-label="About Calculator (Press F2)" 
-                    data-shortcut="F2"
-                    tabindex="-1">@</button>
+                    aria-label="About (Press F2)"
+                    title="About (F2)">@</button>
         </div>
     </div>
-    <div class="history-panel">
+    <div class="history-panel" role="dialog" aria-label="Calculation History">
         <div class="history-header">
-            <h2>History</h2>
+            <h2 id="history-title">History</h2>
             <div class="history-header-buttons">
-                <button class="history-clear" aria-label="Clear History">Clear</button>
-                <button class="history-close" aria-label="Close History">×</button>
+                <button class="history-clear" 
+                        aria-label="Clear History"
+                        role="button">Clear</button>
+                <button class="history-close" 
+                        aria-label="Close History"
+                        role="button">×</button>
             </div>
         </div>
-        <div class="history-list">
+        <div class="history-list" role="list" aria-labelledby="history-title">
             <!-- History entries will be added here dynamically -->
         </div>
     </div>

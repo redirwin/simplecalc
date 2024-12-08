@@ -102,14 +102,12 @@ body {
 
 .calculator-button.decimal {
     position: relative;
+    overflow: visible;
 }
 
-.calculator-button.decimal::before {
-    content: ".";
-    font-size: 1.2rem;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-60%);
+.calculator-button.decimal::before,
+.calculator-button.decimal::after {
+    content: none;
 }
 
 .calculator-button.clear {
@@ -669,23 +667,6 @@ body {
     box-shadow: 0 0 0 2px rgba(106, 90, 205, 0.4);
 }
 
-/* Keyboard shortcut tooltip */
-.calculator-utilities button::after {
-    content: attr(data-shortcut);
-    position: absolute;
-    bottom: -20px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 10px;
-    color: #666;
-    opacity: 0;
-    transition: opacity 0.2s;
-}
-
-.calculator-utilities button:hover::after {
-    opacity: 1;
-}
-
 /* Panel styles */
 .info-panel,
 .about-panel {
@@ -767,4 +748,34 @@ body {
 .about-overlay.show {
     opacity: 1;
     visibility: visible;
+}
+
+/* Remove all tooltip-related styles */
+[title],
+[title]:hover::before,
+.calculator-button[title]:hover::before,
+.calculator-utilities button::before,
+.calculator-utilities button::after,
+.calculator-button[data-action="decimal"]:hover::before {
+    content: none;
+}
+
+/* Keep only essential button styling */
+.calculator-button {
+    position: relative;
+}
+
+.calculator-utilities button {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(106, 90, 205, 0.1);
+    border: none;
+    color: #6A5ACD;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
 }
