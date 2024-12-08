@@ -290,15 +290,18 @@
             this.currentInput = this.formatCalculationResult(result);
             this.expression = [];
             this.isResultDisplayed = true;
-            // Format the operation string with comma separation
-            this.operationString = operationString.replace(/\b\d+(\.\d+)?\b/g, match => this.formatNumber(match));
+            // Format the operation string with comma separation and operator symbols
+            this.operationString = operationString
+                .replace(/\b\d+(\.\d+)?\b/g, match => this.formatNumber(match))
+                .replace(/\//g, '÷')
+                .replace(/\*/g, '×');
             
             this.updateDisplay();
             
             // Add successful calculation to history
             if (this.isResultDisplayed) {
                 this.addToHistory({
-                    expression: this.operationString,
+                    expression: this.operationString,  // Already formatted with × and ÷
                     displayExpression: `${this.operationString} =`,
                     result: this.currentInput
                 });
@@ -600,11 +603,13 @@
     updateDisplay() {
         if (this.isResultDisplayed) {
             this.display.value = this.formatNumber(this.currentInput);
-            this.operatorDisplay.textContent = `${this.operationString} =`;
+            this.operatorDisplay.textContent = this.formatOperatorDisplay(`${this.operationString} =`);
         } else {
             if (this.operationString) {
-                // Format numbers in the display string
-                const formattedDisplay = this.operationString.replace(/\b\d+(\.\d+)?\b/g, match => this.formatNumber(match));
+                // Format numbers and operators in the display string
+                const formattedDisplay = this.operationString
+                    .replace(/\b\d+(\.\d+)?\b/g, match => this.formatNumber(match))
+                    .replace(/\//g, '÷');
                 
                 // Set the main display first
                 this.display.value = formattedDisplay;
@@ -828,7 +833,11 @@
                 return ` ${token}`; // Add space before %
             }
             if (['+', '-', '*', '/'].includes(token)) {
-                return ` ${token} `;
+                // Replace operators with display symbols
+                const displayToken = token === '/' ? '÷' : 
+                                   token === '*' ? '×' : 
+                                   token;
+                return ` ${displayToken} `;
             }
             return token;
         }).join('');
@@ -939,6 +948,15 @@
         this.history = [];
         localStorage.removeItem('calculatorHistory');
         this.updateHistoryDisplay();
+    }
+
+    /**
+     * Format expression for display, replacing operators with display symbols
+     * @param {string} expression - The expression to format
+     * @returns {string} - Formatted expression
+     */
+    formatOperatorDisplay(expression) {
+        return expression.replace(/\//g, '÷').replace(/\*/g, '×');
     }
 }
 
