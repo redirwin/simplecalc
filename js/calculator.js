@@ -484,17 +484,31 @@
                 this.expression.push(this.currentInput);
             }
             const expressionResult = this.evaluateExpression(this.expression.join(' '));
-            this.currentInput = expressionResult.toString();
+            this.currentInput = this.roundResult(expressionResult).toString();
             this.expression = [];
         }
         
         const value = parseFloat(this.currentInput);
-        const originalValue = this.currentInput;
+        const originalValue = this.roundResult(value).toString();
         
         if (value < 0) {
             this.currentInput = "Error";
         } else {
-            this.currentInput = Math.sqrt(value).toString();
+            const sqrtResult = Math.sqrt(value);
+            // Use different precision based on number type
+            if (sqrtResult >= 1000000 || sqrtResult < 0.000001) {
+                // Large/small numbers: use exponential notation
+                this.currentInput = sqrtResult.toExponential(5); // 6 significant digits
+            } else if (Number.isInteger(sqrtResult)) {
+                // Whole numbers: no decimal places
+                this.currentInput = sqrtResult.toString();
+            } else if (this.isIrrational(sqrtResult)) {
+                // Irrational results: show up to 10 digits
+                this.currentInput = Number(sqrtResult.toPrecision(10)).toString();
+            } else {
+                // Regular numbers: 6 significant digits
+                this.currentInput = Number(sqrtResult.toPrecision(6)).toString();
+            }
         }
         
         // Update operation string with clear notation
@@ -520,14 +534,22 @@
                 this.expression.push(this.currentInput);
             }
             const expressionResult = this.evaluateExpression(this.expression.join(' '));
-            this.currentInput = expressionResult.toString();
+            this.currentInput = this.roundResult(expressionResult).toString();
             this.expression = [];
         }
         
         const value = parseFloat(this.currentInput);
-        const originalValue = this.currentInput;
+        const originalValue = this.roundResult(value).toString();
         
-        this.currentInput = Math.pow(value, 2).toString();
+        const squareResult = Math.pow(value, 2);
+        // Use same precision rules as square root
+        if (squareResult >= 1000000 || squareResult < 0.000001) {
+            this.currentInput = squareResult.toExponential(5);
+        } else if (Number.isInteger(squareResult)) {
+            this.currentInput = squareResult.toString();
+        } else {
+            this.currentInput = Number(squareResult.toPrecision(6)).toString();
+        }
         
         // Update operation string with clear notation
         this.operationString = `(${originalValue})²`;
@@ -537,6 +559,21 @@
         this.addToHistory(this.operationString, this.currentInput);
         
         this.updateDisplay();
+    }
+
+    /**
+     * Helper method to check if a number appears to be irrational
+     * @param {number} num - The number to check
+     * @returns {boolean} - True if the number appears to be irrational
+     */
+    isIrrational(num) {
+        // Convert to string and check decimal places
+        const str = num.toString();
+        if (!str.includes('.')) return false;
+        
+        const decimals = str.split('.')[1];
+        // Consider "irrational" if more than 6 non-zero decimal places
+        return decimals.length > 6 && !decimals.endsWith('0'.repeat(decimals.length - 6));
     }
 
     /**
