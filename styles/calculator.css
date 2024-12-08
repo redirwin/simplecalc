@@ -339,3 +339,61 @@ body {
     font-size: 25px;
     display: flex;
 }
+
+/* Base focus styles */
+:focus {
+    outline: none; /* Remove default focus outline */
+}
+
+/* Calculator buttons focus style */
+.calculator-button:focus {
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.4);
+    position: relative;
+    z-index: 1;
+}
+
+/* Special focus styles for different button types */
+.calculator-button.clear:focus {
+    box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.4);
+}
+
+.calculator-button.equals:focus {
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.4);
+}
+
+.calculator-button.special:focus {
+    box-shadow: 0 0 0 3px rgba(106, 90, 205, 0.4);
+}
+
+.calculator-button.operator:focus {
+    box-shadow: 0 0 0 3px rgba(255, 165, 0, 0.4);
+}
+
+/* History panel focus styles */
+.history-entry:focus {
+    background-color: rgba(0, 123, 255, 0.1);
+    box-shadow: inset 0 0 0 2px #007BFF;
+    border-radius: 4px;
+}
+
+.history-clear:focus {
+    background-color: rgba(230, 57, 70, 0.1);
+    box-shadow: 0 0 0 2px #e63946;
+    border-radius: 4px;
+}
+
+.history-close:focus {
+    background-color: rgba(102, 102, 102, 0.1);
+    box-shadow: 0 0 0 2px #666;
+    border-radius: 50%;
+}
+
+/* Only show focus styles when using keyboard navigation */
+:focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+}
+
+:focus-visible {
+    outline: none; /* Ensure no default outline shows */
+}
