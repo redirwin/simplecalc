@@ -292,11 +292,16 @@
             this.isResultDisplayed = true;
             // Format the operation string with comma separation
             this.operationString = operationString.replace(/\b\d+(\.\d+)?\b/g, match => this.formatNumber(match));
+            
             this.updateDisplay();
             
             // Add successful calculation to history
             if (this.isResultDisplayed) {
-                this.addToHistory(this.operationString, this.currentInput);
+                this.addToHistory({
+                    expression: this.operationString,
+                    displayExpression: `${this.operationString} =`,
+                    result: this.currentInput
+                });
             }
             
         } catch (error) {
@@ -878,16 +883,11 @@
 
     /**
      * Adds a calculation to history
-     * @param {string} expression - The calculation expression
-     * @param {string} result - The calculation result
+     * @param {{ expression: string, displayExpression: string, result: string }} historyData
      */
-    addToHistory(expression, result) {
-        // Format numbers within the expression
-        const formattedExpression = expression.replace(/\b\d+(\.\d+)?\b/g, match => this.formatNumber(match));
-        
+    addToHistory(historyData) {
         const historyEntry = {
-            expression: formattedExpression,
-            result,
+            ...historyData,
             timestamp: Date.now()
         };
 
@@ -913,7 +913,7 @@
         this.historyList.innerHTML = this.history.length ? 
             this.history.map((entry, index) => `
                 <div class="history-entry" data-index="${index}">
-                    <div class="history-expression">${entry.expression}</div>
+                    <div class="history-expression">${entry.displayExpression}</div>
                     <div class="history-result">${this.formatNumber(entry.result)}</div>
                 </div>
             `).join('') : 
@@ -925,8 +925,7 @@
                 const historyEntry = this.history[entry.dataset.index];
                 this.currentInput = historyEntry.result;
                 this.isResultDisplayed = true;
-                // Set the full expression in the operator display
-                this.operationString = historyEntry.expression;
+                this.operationString = historyEntry.expression;  // Use clean expression for restoration
                 this.updateDisplay();
                 this.closeHistoryPanel();
             });
