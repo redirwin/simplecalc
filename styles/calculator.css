@@ -30,6 +30,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    overflow: hidden;
 }
 
 #operator-display {
@@ -38,6 +39,9 @@ body {
     text-align: right;
     height: 20px;
     line-height: 20px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #display {
@@ -51,6 +55,16 @@ body {
     padding: 0;
     margin: 0;
     outline: none;
+    white-space: nowrap;
+    overflow-x: auto;
+    text-overflow: initial;
+    direction: ltr;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#display::-webkit-scrollbar {
+    display: none;
 }
 
 .calculator-buttons {

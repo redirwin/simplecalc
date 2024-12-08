@@ -11,7 +11,11 @@ A lightweight, efficient calculator extension for Chrome that provides essential
 - Keyboard support
 - Error handling and input validation
 - Responsive design with visual feedback
-- Maximum 15-digit display with scientific notation
+- Maximum 15-digit number input with scientific notation
+- Intelligent display handling for long expressions:
+  - Main display shows current calculation with horizontal scrolling
+  - Secondary display appears automatically for overflow expressions
+  - Maintains visibility of current input
 - Works offline
 
 ## Installation

@@ -490,15 +490,32 @@
             this.display.value = this.formatNumber(this.currentInput);
             this.operatorDisplay.textContent = `${this.operationString} =`;
         } else {
-            // Format the display value while keeping the operation string unformatted
             if (this.operationString) {
-                // Format only the numbers in the display, not in the stored operation string
+                // Format numbers in the display string
                 const formattedDisplay = this.operationString.replace(/\b\d+(\.\d+)?\b/g, match => this.formatNumber(match));
+                
+                // Set the main display first
                 this.display.value = formattedDisplay;
+                
+                // Check if content is overflowing
+                const isOverflowing = this.display.scrollWidth > this.display.clientWidth;
+                
+                if (isOverflowing) {
+                    // Show full expression in operator display only when overflowing
+                    this.operatorDisplay.textContent = formattedDisplay;
+                } else {
+                    // Clear operator display if not overflowing
+                    this.operatorDisplay.textContent = "";
+                }
+                
+                // Ensure we're scrolled to the end
+                requestAnimationFrame(() => {
+                    this.display.scrollLeft = this.display.scrollWidth;
+                });
             } else {
                 this.display.value = this.formatNumber(this.currentInput || "0");
+                this.operatorDisplay.textContent = "";
             }
-            this.operatorDisplay.textContent = "";
         }
     }
 
