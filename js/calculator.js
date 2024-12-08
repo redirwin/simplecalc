@@ -273,16 +273,22 @@
             this.clear();
         }
 
-        // Replace initial "0" instead of appending to it
-        if (this.currentInput === "0") {
+        // Start fresh input after opening parenthesis
+        if (this.expression.length > 0 && 
+            this.expression[this.expression.length - 1] === "(") {
             this.currentInput = number;
-        } else {
-            // Normal append behavior for non-zero states
-            if (this.currentInput.length < this.MAX_DIGITS) {
-                this.currentInput += number;
-            }
         }
+        // Replace initial "0"
+        else if (this.currentInput === "0") {
+            this.currentInput = number;
+        }
+        // Normal append
+        else if (this.currentInput.length < this.MAX_DIGITS) {
+            this.currentInput += number;
+        }
+
         this.isResultDisplayed = false;
+        this.buildOperationString();  // Explicitly rebuild operation string
         this.updateDisplay();
     }
 
@@ -389,6 +395,14 @@
         try {
             // Join the expression array with the current input
             if (this.currentInput) {
+                // Check for implicit multiplication before adding current input
+                const lastToken = this.expression[this.expression.length - 1];
+                if (lastToken === ')') {
+                    // Ensure multiplication operator is present
+                    if (this.expression[this.expression.length - 1] !== '*') {
+                        this.expression.push('*');
+                    }
+                }
                 this.expression.push(this.currentInput);
             }
             
@@ -400,20 +414,23 @@
             
             // Format and display result
             this.currentInput = this.formatCalculationResult(result);
+            
+            // Store the formatted expression with explicit multiplication symbols
+            this.operationString = this.expression.map(token => {
+                if (token === '*') return '×';
+                if (token === '/') return '÷';
+                return token;
+            }).join(' ');
+            
             this.expression = [];
             this.isResultDisplayed = true;
-            // Format the operation string with comma separation and operator symbols
-            this.operationString = operationString
-                .replace(/\b\d+(\.\d+)?\b/g, match => this.formatNumber(match))
-                .replace(/\//g, '÷')
-                .replace(/\*/g, '×');
             
             this.updateDisplay();
             
-            // Add successful calculation to history
+            // Add successful calculation to history with correct formatting
             if (this.isResultDisplayed) {
                 this.addToHistory({
-                    expression: this.operationString,  // Already formatted with × and ÷
+                    expression: this.operationString,
                     displayExpression: `${this.operationString} =`,
                     result: this.currentInput
                 });
@@ -832,25 +849,24 @@
         }
 
         // Check for implicit multiplication after closing parenthesis
-        if (this.expression.length > 0 && 
-            this.expression[this.expression.length - 1] === ')' && 
-            !this.currentInput) {
-            
-            // Add the current expression to array
+        const lastToken = this.expression[this.expression.length - 1];
+        if (lastToken === ')') {
+            // Add multiplication operator to the actual expression
             this.expression.push('*');
-        }
-
-        // Handle digit limits
-        if (this.currentInput.length >= this.MAX_DIGITS) {
-            this.showLimitExceededFeedback();
-            return;
-        }
-
-        // Update currentInput
-        if (this.currentInput === "0" && num !== ".") {
-            this.currentInput = num;
+            this.currentInput = num;  // Start fresh number input
+            this.isResultDisplayed = false;
         } else {
-            this.currentInput += num;
+            // Normal number input handling
+            if (this.currentInput.length >= this.MAX_DIGITS) {
+                this.showLimitExceededFeedback();
+                return;
+            }
+
+            if (this.currentInput === "0") {
+                this.currentInput = num;
+            } else {
+                this.currentInput += num;
+            }
         }
 
         this.buildOperationString();
@@ -879,39 +895,60 @@
             this.clear();
         }
 
-        // Determine if we should close a parenthesis
-        const shouldClose = 
-            // Must have open parentheses
-            this.parenthesesCount > 0 && 
-            // Must have either current input or last token isn't an operator or opening parenthesis
-            (this.currentInput || 
-             (this.expression.length > 0 && 
-              !['+', '-', '*', '/', '('].includes(this.expression[this.expression.length - 1])));
-
-        if (shouldClose) {
-            // Add current input to expression if it exists
-            if (this.currentInput) {
+        // Add current input to expression if it exists and is not the initial "0"
+        if (this.currentInput && this.currentInput !== "0") {
+            // Handle implicit multiplication for opening parenthesis
+            if (this.parenthesesCount === 0 && !isNaN(this.currentInput)) {
                 this.expression.push(this.currentInput);
-                this.currentInput = "";
-            }
-            this.expression.push(")");
-            this.parenthesesCount--;
-        } else {
-            // Handle opening parenthesis
-            // Add implicit multiplication only if there's a number or closing parenthesis before
-            if (this.currentInput || 
-                (this.expression.length > 0 && 
-                 this.expression[this.expression.length - 1] === ')')) {
-                if (this.currentInput) {
-                    this.expression.push(this.currentInput);
-                }
                 this.expression.push("*");
-                this.currentInput = "";
+            } else {
+                this.expression.push(this.currentInput);
             }
-            this.expression.push("(");
-            this.parenthesesCount++;
         }
+
+        // Clear currentInput (don't set to "0")
+        this.currentInput = "";
         
+        // Determine whether to add opening or closing parenthesis
+        if (this.parenthesesCount === 0 || 
+            ["+", "-", "*", "/"].includes(this.expression[this.expression.length - 1])) {
+            this.parenthesesCount++;
+            this.expression.push("(");
+        } else {
+            this.parenthesesCount--;
+            this.expression.push(")");
+        }
+
+        this.buildOperationString();
+        this.updateDisplay();
+        this.isResultDisplayed = false;
+    }
+
+    /**
+     * Handles operator input
+     * @param {string} operator - The operator pressed
+     */
+    handleOperator(operator) {
+        if (this.isResultDisplayed) {
+            // If we're starting from a result, use it as the first operand
+            this.expression = [this.currentInput];
+            this.isResultDisplayed = false;
+        }
+
+        // If we have current input, add it to expression before the operator
+        if (this.currentInput) {
+            // Check if we need to maintain implicit multiplication
+            const lastToken = this.expression[this.expression.length - 1];
+            if (lastToken === ')' && this.expression[this.expression.length - 2] !== '*') {
+                this.expression.push('*');  // Add multiplication operator if missing
+            }
+            this.expression.push(this.currentInput);
+        }
+
+        // Add the new operator
+        this.expression.push(operator);
+        this.currentInput = "";
+
         this.buildOperationString();
         this.updateDisplay();
     }
@@ -920,15 +957,29 @@
      * Build operation string from expression array
      */
     buildOperationString() {
+        // First, ensure implicit multiplication is maintained in expression array
+        for (let i = 0; i < this.expression.length - 1; i++) {
+            if (this.expression[i] === ')' && 
+                this.expression[i + 1] !== '*' && 
+                this.expression[i + 1] !== '+' && 
+                this.expression[i + 1] !== '-' && 
+                this.expression[i + 1] !== '/' && 
+                this.expression[i + 1] !== ')') {
+                // Insert multiplication operator
+                this.expression.splice(i + 1, 0, '*');
+                i++; // Skip the inserted operator
+            }
+        }
+
+        // Convert expression array to display string
         let str = this.expression.map(token => {
             if (token === '(' || token === ')') {
                 return token;
             }
             if (token === '%') {
-                return ` ${token}`; // Add space before %
+                return ` ${token}`;
             }
             if (['+', '-', '*', '/'].includes(token)) {
-                // Replace operators with display symbols
                 const displayToken = token === '/' ? '÷' : 
                                    token === '*' ? '×' : 
                                    token;
@@ -939,8 +990,14 @@
         
         str = str.replace(/\s+/g, ' ').trim();
         
+        // Add current input with proper formatting
         if (this.currentInput) {
-            str += str ? ` ${this.currentInput}` : this.currentInput;
+            const lastToken = this.expression[this.expression.length - 1];
+            if (lastToken === ')') {
+                str += ` × ${this.currentInput}`;
+            } else {
+                str += str ? ` ${this.currentInput}` : this.currentInput;
+            }
         }
         
         this.operationString = str;
