@@ -2,7 +2,7 @@
  * Calculator state management and operations
  */class Calculator {
     constructor() {
-        this.currentInput = "";
+        this.currentInput = "0";
         this.previousInput = "";
         this.operation = null;
         this.isResultDisplayed = false;
@@ -14,6 +14,9 @@
         this.operatorDisplay = document.getElementById("operator-display");
         this.MAX_DIGITS = 15;
         this.calculatorDisplay = document.querySelector(".calculator-display");
+
+        // Initialize display with "0"
+        this.updateDisplay();
 
         // Add new state for expression building
         this.expression = [];  // Array to store full expression tokens
@@ -270,31 +273,16 @@
             this.clear();
         }
 
-        // Check for implicit multiplication after closing parenthesis
-        if (this.expression.length > 0 && 
-            this.expression[this.expression.length - 1] === ')') {
-            
-            if (this.currentInput) {
-                this.expression.push(this.currentInput);
-            }
-            this.expression.push('*');
+        // Replace initial "0" instead of appending to it
+        if (this.currentInput === "0") {
             this.currentInput = number;
         } else {
-            // Handle digit limits
-            if (this.currentInput.length >= this.MAX_DIGITS) {
-                this.showLimitExceededFeedback();
-                return;
-            }
-
-            // Update currentInput
-            if (this.currentInput === "0" && number !== ".") {
-                this.currentInput = number;
-            } else {
+            // Normal append behavior for non-zero states
+            if (this.currentInput.length < this.MAX_DIGITS) {
                 this.currentInput += number;
             }
         }
-
-        this.buildOperationString();
+        this.isResultDisplayed = false;
         this.updateDisplay();
     }
 
@@ -324,6 +312,11 @@
      * @param {string} op - The operation to set
      */
     setOperation(op) {
+        if (this.currentInput === "") {
+            // If no current input, use "0" as the starting number
+            this.currentInput = "0";
+        }
+
         // Handle as regular operation
         if (this.currentInput === "" && this.expression.length === 0) return;
 
@@ -868,39 +861,14 @@
      * Handles deletion of the last entered character
      */
     handleDelete() {
-        // Handle result state
-        if (this.isResultDisplayed) {
-            this.clear();
-            return;
-        }
-
-        // If we have a current input, delete from it first
-        if (this.currentInput) {
+        if (this.currentInput.length > 0) {
             this.currentInput = this.currentInput.slice(0, -1);
-        } 
-        // If no current input, remove the last item from expression array
-        else if (this.expression.length > 0) {
-            const lastToken = this.expression.pop();
-            
-            // Update parentheses count when deleting parentheses
-            if (lastToken === '(') {
-                this.parenthesesCount--;
-            } else if (lastToken === ')') {
-                this.parenthesesCount++;
+            // If all digits are deleted, show "0" instead of empty display
+            if (this.currentInput === "") {
+                this.currentInput = "0";
             }
-            
-            // If we just removed an operator and the last token is a number,
-            // move it to currentInput for digit-by-digit deletion
-            if (['+', '-', '*', '/', '%'].includes(lastToken) && 
-                this.expression.length > 0 && 
-                !isNaN(this.expression[this.expression.length - 1])) {
-                this.currentInput = this.expression.pop();
-            }
+            this.updateDisplay();
         }
-
-        // Rebuild the operation string
-        this.buildOperationString();
-        this.updateDisplay();
     }
 
     /**
@@ -1215,6 +1183,22 @@
                 button.setAttribute('aria-label', tooltip);
             }
         });
+    }
+
+    /**
+     * Handles clear action
+     */
+    handleClear() {
+        this.currentInput = "0";
+        this.previousInput = "";
+        this.operation = null;
+        this.isResultDisplayed = false;
+        this.lastNumber = null;
+        this.lastOperation = null;
+        this.operationString = "";
+        this.expression = [];
+        this.parenthesesCount = 0;
+        this.updateDisplay();
     }
 }
 
