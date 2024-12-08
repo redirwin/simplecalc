@@ -21,6 +21,13 @@ A lightweight, efficient calculator extension for Chrome that provides essential
   - Secondary display appears automatically for overflow expressions
   - Maintains visibility of current input
 - Works offline
+- Accessibility Features:
+  - WCAG 2.1 compliant color contrast ratios
+  - Clear visual hierarchy with distinct button colors
+  - Proper ARIA labels for all interactive elements
+  - Screen reader compatibility
+  - Native browser accessibility features
+  - Consistent button sizing and spacing
 
 ## Installation
 
@@ -162,3 +169,23 @@ Note: The calculator supports both main keyboard and number pad input for number
 - Default mapping presets (Windows Calculator, Mac Calculator, etc.)
 
 Note: These features are under development. The current version uses default keyboard mappings as documented in the Keyboard Shortcuts section above.
+
+## Design Details
+
+### Color Scheme
+- Number buttons: Deep blue (#0056b3)
+- Operators: Orange (#e67e00)
+- Special Functions: Purple (#563d7c)
+- Action buttons:
+  - Clear: Red (#e63946)
+  - History/Equals: Dark green (#187a2e)
+- Utility buttons: Light purple background with contrasting text
+
+All colors are chosen to meet or exceed WCAG 2.1 contrast requirements:
+- Regular text: 4.5:1 minimum contrast ratio
+- Large text (1.2rem and above): 3:1 minimum contrast ratio
+
+### Typography
+- Primary button text: 1.2rem
+- Operator symbols: 1.5-1.8rem for improved visibility
+- Clear visual hierarchy through size differentiation
