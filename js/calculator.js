@@ -594,8 +594,6 @@
 
     /**
      * Handles deletion of the last entered character
-     * If displaying a result, clears the calculator
-     * Otherwise removes the last entered digit or operator
      */
     handleDelete() {
         // Handle result state
@@ -611,11 +609,20 @@
         // If no current input, remove the last item from expression array
         else if (this.expression.length > 0) {
             const lastToken = this.expression.pop();
+            
             // Update parentheses count when deleting parentheses
             if (lastToken === '(') {
                 this.parenthesesCount--;
             } else if (lastToken === ')') {
                 this.parenthesesCount++;
+            }
+            
+            // If we just removed an operator and the last token is a number,
+            // move it to currentInput for digit-by-digit deletion
+            if (['+', '-', '*', '/', '%'].includes(lastToken) && 
+                this.expression.length > 0 && 
+                !isNaN(this.expression[this.expression.length - 1])) {
+                this.currentInput = this.expression.pop();
             }
         }
 
