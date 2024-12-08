@@ -564,8 +564,12 @@
         this.operationString = `√(${originalValue})`;
         this.isResultDisplayed = true;
         
-        // Add to history
-        this.addToHistory(this.operationString, this.currentInput);
+        // Fix: Pass properly structured history object
+        this.addToHistory({
+            expression: this.operationString,
+            displayExpression: `${this.operationString} =`,
+            result: this.currentInput
+        });
         
         this.updateDisplay();
     }
@@ -604,8 +608,12 @@
         this.operationString = `(${originalValue})²`;
         this.isResultDisplayed = true;
         
-        // Add to history
-        this.addToHistory(this.operationString, this.currentInput);
+        // Fix: Pass properly structured history object
+        this.addToHistory({
+            expression: this.operationString,
+            displayExpression: `${this.operationString} =`,
+            result: this.currentInput
+        });
         
         this.updateDisplay();
     }
