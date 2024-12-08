@@ -47,6 +47,11 @@
             <button class="calculator-button clear" data-action="clear">C</button>
             <button class="calculator-button equals" data-action="calculate">=</button>
         </div>
+        <div class="calculator-utilities">
+            <button class="info-button" aria-label="Information and Help">?</button>
+            <button class="about-button" aria-label="About Calculator">@</button>
+            <!-- Space for additional utility buttons/links -->
+        </div>
     </div>
     <div class="history-panel">
         <div class="history-header">
@@ -61,6 +66,26 @@
         </div>
     </div>
     <div class="history-overlay"></div>
+    <div class="info-panel">
+        <div class="info-header">
+            <h2>Calculator Help</h2>
+            <button class="info-close" aria-label="Close Information">×</button>
+        </div>
+        <div class="info-content">
+            <!-- Content will be added here -->
+        </div>
+    </div>
+    <div class="info-overlay"></div>
+    <div class="about-panel">
+        <div class="about-header">
+            <h2>About Calculator</h2>
+            <button class="about-close" aria-label="Close About">×</button>
+        </div>
+        <div class="about-content">
+            <!-- Content will be added here -->
+        </div>
+    </div>
+    <div class="about-overlay"></div>
     <script type="module" src="js/init.js"></script>
 </body>
 </html> 
