@@ -36,12 +36,23 @@ A lightweight, efficient calculator extension for Chrome that provides essential
 - Chain multiple operations using the result of previous calculations
 - Supports keyboard shortcuts:
   - Numbers (0-9)
-  - Operators (+, -, *, /, %)
-  - Parentheses ( )
-  - Enter/= for calculation
-  - Escape for clear
-  - Decimal point (.)
-  - Backspace/Delete for deletion
+  - Basic operators:
+    - Addition (+)
+    - Subtraction (-)
+    - Multiplication (*)
+    - Division (/)
+    - Percentage (%)
+  - Advanced functions:
+    - Square root (r)
+    - Square (s)
+    - Sign toggle (!)
+  - Input controls:
+    - Open parenthesis (()
+    - Close parenthesis ())
+    - Decimal point (.)
+    - Calculate (Enter or =)
+    - Clear (Escape)
+    - Delete (Backspace or Delete)
 
 ### Display Features
 - Main display with automatic horizontal scrolling

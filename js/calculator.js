@@ -95,8 +95,13 @@
             e.preventDefault();
             this.handleAction("percent");
         } else if (e.key === "(" || e.key === ")") {
-            // Direct parenthesis input from keyboard
             this.handleKeyboardParenthesis(e.key);
+        } else if (e.key.toLowerCase() === "r") {  // 'r' for square root (√)
+            this.handleAction("sqrt");
+        } else if (e.key.toLowerCase() === "s") {  // 's' for square (x²)
+            this.handleAction("square");
+        } else if (e.key === "!") {  // '!' for sign toggle (+/-)
+            this.handleAction("toggleSign");
         }
     }
 
