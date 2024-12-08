@@ -294,3 +294,36 @@ body {
 .history-close:hover {
     color: #333;
 }
+
+.history-empty {
+    color: #666;
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+}
+
+.history-entry {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.history-entry:hover {
+    background-color: #f8f9fa;
+}
+
+.history-expression {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+
+.history-result {
+    color: #333;
+    font-weight: bold;
+}
+
+.history-list {
+    padding: 0;
+}

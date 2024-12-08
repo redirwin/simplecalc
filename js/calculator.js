@@ -19,6 +19,18 @@
         this.expression = [];  // Array to store full expression tokens
         this.parenthesesCount = 0;
 
+        // Add history state
+        this.history = JSON.parse(localStorage.getItem('calculatorHistory') || '[]');
+        
+        // Initialize history UI elements
+        this.historyList = document.querySelector(".history-list");
+        this.updateHistoryDisplay();
+
+        // Add history clear button listener
+        document.querySelector(".history-clear").addEventListener("click", () => {
+            this.clearHistory();
+        });
+
         this.initializeEventListeners();
     }
 
@@ -283,6 +295,11 @@
             this.isResultDisplayed = true;
             this.operationString = operationString; // Store for display
             this.updateDisplay();
+            
+            // Add successful calculation to history
+            if (this.isResultDisplayed) {
+                this.addToHistory(operationString, this.currentInput);
+            }
             
         } catch (error) {
             this.currentInput = "Error";
@@ -786,6 +803,63 @@
         historyPanel.classList.remove("open");
         historyOverlay.classList.remove("show");
         historyButton.classList.remove("active");
+    }
+
+    /**
+     * Adds a calculation to history
+     * @param {string} expression - The calculation expression
+     * @param {string} result - The calculation result
+     */
+    addToHistory(expression, result) {
+        const historyEntry = {
+            expression,
+            result,
+            timestamp: Date.now()
+        };
+
+        this.history.unshift(historyEntry); // Add to start of array
+        if (this.history.length > 100) { // Limit history length
+            this.history.pop();
+        }
+
+        localStorage.setItem('calculatorHistory', JSON.stringify(this.history));
+        this.updateHistoryDisplay();
+    }
+
+    /**
+     * Updates the history panel display
+     */
+    updateHistoryDisplay() {
+        if (!this.historyList) return;
+        
+        this.historyList.innerHTML = this.history.length ? 
+            this.history.map((entry, index) => `
+                <div class="history-entry" data-index="${index}">
+                    <div class="history-expression">${entry.expression}</div>
+                    <div class="history-result">${this.formatNumber(entry.result)}</div>
+                </div>
+            `).join('') : 
+            '<div class="history-empty">No calculations yet</div>';
+
+        // Add click listeners to history entries
+        document.querySelectorAll('.history-entry').forEach(entry => {
+            entry.addEventListener('click', () => {
+                const historyEntry = this.history[entry.dataset.index];
+                this.currentInput = historyEntry.result;
+                this.isResultDisplayed = true;
+                this.updateDisplay();
+                this.closeHistoryPanel();
+            });
+        });
+    }
+
+    /**
+     * Clears calculation history
+     */
+    clearHistory() {
+        this.history = [];
+        localStorage.removeItem('calculatorHistory');
+        this.updateHistoryDisplay();
     }
 }
 
