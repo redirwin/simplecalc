@@ -472,13 +472,24 @@
     }
 
     /**
-     * Calculate square root of current input
+     * Calculate square root of current expression or input
      */
     calculateSquareRoot() {
-        if (this.currentInput === "") return;
+        // If no input and no expression, return
+        if (this.currentInput === "" && this.expression.length === 0) return;
+        
+        // If we have a pending expression, evaluate it first
+        if (this.expression.length > 0) {
+            if (this.currentInput) {
+                this.expression.push(this.currentInput);
+            }
+            const expressionResult = this.evaluateExpression(this.expression.join(' '));
+            this.currentInput = expressionResult.toString();
+            this.expression = [];
+        }
         
         const value = parseFloat(this.currentInput);
-        this.operationString = `√(${this.currentInput})`;
+        const originalValue = this.currentInput;
         
         if (value < 0) {
             this.currentInput = "Error";
@@ -486,20 +497,45 @@
             this.currentInput = Math.sqrt(value).toString();
         }
         
+        // Update operation string with clear notation
+        this.operationString = `√(${originalValue})`;
         this.isResultDisplayed = true;
-        this.updateOperatorDisplay("");
+        
+        // Add to history
+        this.addToHistory(this.operationString, this.currentInput);
+        
         this.updateDisplay();
     }
 
     /**
-     * Calculate square of current input
+     * Calculate square of current expression or input
      */
     calculateSquare() {
-        if (this.currentInput === "") return;
-        this.operationString = `(${this.currentInput})`;
-        this.currentInput = Math.pow(parseFloat(this.currentInput), 2).toString();
+        // If no input and no expression, return
+        if (this.currentInput === "" && this.expression.length === 0) return;
+        
+        // If we have a pending expression, evaluate it first
+        if (this.expression.length > 0) {
+            if (this.currentInput) {
+                this.expression.push(this.currentInput);
+            }
+            const expressionResult = this.evaluateExpression(this.expression.join(' '));
+            this.currentInput = expressionResult.toString();
+            this.expression = [];
+        }
+        
+        const value = parseFloat(this.currentInput);
+        const originalValue = this.currentInput;
+        
+        this.currentInput = Math.pow(value, 2).toString();
+        
+        // Update operation string with clear notation
+        this.operationString = `(${originalValue})²`;
         this.isResultDisplayed = true;
-        this.updateOperatorDisplay("");
+        
+        // Add to history
+        this.addToHistory(this.operationString, this.currentInput);
+        
         this.updateDisplay();
     }
 
