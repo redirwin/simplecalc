@@ -877,14 +877,32 @@
      * Handles deletion of the last entered character
      */
     handleDelete() {
+        // If showing a result, clear everything instead of backspacing
+        if (this.isResultDisplayed) {
+            this.clearDisplay();
+            return;
+        }
+
+        // If we have current input, backspace it
         if (this.currentInput.length > 0) {
             this.currentInput = this.currentInput.slice(0, -1);
-            // If all digits are deleted, show "0" instead of empty display
-            if (this.currentInput === "") {
+            // Only set to "0" if we've backspaced everything out
+            if (this.currentInput === "" && this.expression.length === 0) {
                 this.currentInput = "0";
             }
-            this.updateDisplay();
         }
+        // If no current input and we have an expression, remove the operator
+        else if (this.currentInput === "" && this.expression.length > 0) {
+            this.expression.pop();  // Remove the operator
+            if (this.expression.length > 0) {
+                this.currentInput = this.expression.pop();  // Get previous number
+            } else {
+                this.currentInput = "0";  // Only set to "0" when expression is empty
+            }
+        }
+
+        this.buildOperationString();
+        this.updateDisplay();
     }
 
     /**
@@ -930,22 +948,22 @@
      */
     handleOperator(operator) {
         if (this.isResultDisplayed) {
-            // If we're starting from a result, use it as the first operand
-            this.expression = [this.currentInput];
+            // Convert the result into the first part of the new expression
+            this.expression = [];
+            this.expression.push(this.currentInput);
+            this.currentInput = "";
             this.isResultDisplayed = false;
         }
 
-        // If we have current input, add it to expression before the operator
+        // Add current input and operator to expression
         if (this.currentInput) {
-            // Check if we need to maintain implicit multiplication
             const lastToken = this.expression[this.expression.length - 1];
             if (lastToken === ')' && this.expression[this.expression.length - 2] !== '*') {
-                this.expression.push('*');  // Add multiplication operator if missing
+                this.expression.push('*');
             }
             this.expression.push(this.currentInput);
         }
 
-        // Add the new operator
         this.expression.push(operator);
         this.currentInput = "";
 
