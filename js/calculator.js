@@ -90,6 +90,13 @@
         // Add keyboard trap for history panel
         document.addEventListener('keydown', (e) => {
             const historyPanel = document.querySelector(".history-panel");
+            
+            // If history panel is closed, make its elements non-tabbable
+            const historyElements = historyPanel.querySelectorAll('button, [tabindex="0"]');
+            historyElements.forEach(element => {
+                element.setAttribute('tabindex', historyPanel.classList.contains('open') ? '0' : '-1');
+            });
+
             if (!historyPanel.classList.contains('open')) return;
 
             if (e.key === 'Tab') {
@@ -1027,19 +1034,25 @@
     }
 
     /**
-     * Opens history panel and sets initial focus
+     * Opens history panel and sets up focus management
      */
     openHistoryPanel() {
         const historyPanel = document.querySelector(".history-panel");
         const historyOverlay = document.querySelector(".history-overlay");
         const historyButton = document.querySelector("[data-action='history']");
         
-        // Store the element that had focus before opening panel
+        // Store last focused element before opening panel
         this.lastFocusedElement = document.activeElement;
         
         historyPanel.classList.add("open");
         historyOverlay.classList.add("show");
         historyButton.classList.add("active");
+
+        // Make history elements tabbable when panel is open
+        const historyElements = historyPanel.querySelectorAll('button, [tabindex="-1"]');
+        historyElements.forEach(element => {
+            element.setAttribute('tabindex', '0');
+        });
 
         // Set focus to first history entry or clear button
         const firstFocusable = historyPanel.querySelector('.history-entry, .history-clear');
@@ -1056,6 +1069,12 @@
         const historyOverlay = document.querySelector(".history-overlay");
         const historyButton = document.querySelector("[data-action='history']");
         
+        // Make history elements non-tabbable when panel is closed
+        const historyElements = historyPanel.querySelectorAll('button, [tabindex="0"]');
+        historyElements.forEach(element => {
+            element.setAttribute('tabindex', '-1');
+        });
+
         historyPanel.classList.remove("open");
         historyOverlay.classList.remove("show");
         historyButton.classList.remove("active");
@@ -1099,7 +1118,7 @@
             this.history.map((entry, index) => `
                 <div class="history-entry" 
                      data-index="${index}" 
-                     tabindex="0" 
+                     tabindex="-1" 
                      role="button" 
                      aria-label="Restore calculation: ${entry.displayExpression} ${this.formatNumber(entry.result)}"
                      title="Press Enter to restore this calculation">
