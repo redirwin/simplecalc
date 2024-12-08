@@ -52,17 +52,21 @@
      */
     handleKeyboardInput(e) {
         if (e.key >= "0" && e.key <= "9") {
-            this.appendNumber(e.key);
+            this.handleNumber(e.key);
         } else if (e.key === ".") {
-            this.appendDecimal();
+            this.handleAction("decimal");
         } else if (["+", "-", "*", "/"].includes(e.key)) {
             this.setOperation(e.key);
         } else if (e.key === "Enter" || e.key === "=") {
-            this.calculate();
+            e.preventDefault();
+            this.handleAction("calculate");
         } else if (e.key === "Escape") {
-            this.clear();
+            this.handleAction("clear");
         } else if (e.key === "Backspace" || e.key === "Delete") {
-            this.handleDelete();
+            this.handleAction("delete");
+        } else if (e.key === "%") {
+            e.preventDefault();
+            this.handleAction("percent");
         }
     }
 
@@ -74,12 +78,6 @@
         switch (action) {
             case "delete":
                 this.handleDelete();
-                break;
-            case "sqrt":
-                this.calculateSquareRoot();
-                break;
-            case "square":
-                this.calculateSquare();
                 break;
             case "clear":
                 this.clear();
@@ -95,6 +93,15 @@
                 break;
             case "parenthesis":
                 this.handleParenthesis();
+                break;
+            case "percent":  // Make sure this case exists and is correct
+                this.handlePercentage();
+                break;
+            case "sqrt":
+                this.calculateSquareRoot();
+                break;
+            case "square":
+                this.calculateSquare();
                 break;
         }
     }
@@ -299,31 +306,65 @@
      * @returns {number} - The result of the evaluation
      */
     evaluateExpression(expression) {
-        // Handle potential lack of spaces around operators
-        expression = expression.replace(/([+\-*/])/g, ' $1 ');
+        // Convert expression to tokens
+        let tokens = expression.split(' ').filter(token => token !== '');
         
-        // Parse the expression into tokens
-        const tokens = expression.split(' ').filter(token => token !== '');
-
-        // Handle negative numbers before tokenizing operations
+        // First pass: handle percentages
+        for (let i = 0; i < tokens.length; i++) {
+            if (tokens[i] === '%') {
+                const percentValue = parseFloat(tokens[i - 1]);
+                
+                // Look for operator before the percentage value
+                let baseNumber = null;
+                if (i >= 3 && ['+', '-', '*', '/'].includes(tokens[i - 2])) {
+                    baseNumber = parseFloat(tokens[i - 3]);
+                }
+                
+                let result;
+                if (baseNumber !== null) {
+                    // Calculate percentage based on the number before the operator
+                    result = (percentValue / 100) * baseNumber;
+                    
+                    if (tokens[i - 2] === '+' || tokens[i - 2] === '-') {
+                        // For + and -, replace just the percentage part
+                        tokens.splice(i - 1, 2, result.toString());
+                    } else {
+                        // For * and /, convert to decimal
+                        result = percentValue / 100;
+                        tokens.splice(i - 1, 2, result.toString());
+                    }
+                } else {
+                    // Direct percentage calculation (like 20%12)
+                    const rightNum = i + 1 < tokens.length ? parseFloat(tokens[i + 1]) : null;
+                    if (rightNum !== null) {
+                        result = (percentValue / 100) * rightNum;
+                        tokens.splice(i - 1, 3, result.toString());
+                    } else {
+                        result = percentValue / 100;
+                        tokens.splice(i - 1, 2, result.toString());
+                    }
+                }
+                i--; // Adjust index after splice
+            }
+        }
+        
+        // Continue with existing evaluation logic...
+        // Handle negative numbers
         const processedTokens = [];
         for (let i = 0; i < tokens.length; i++) {
             const token = tokens[i];
-            // If it's a minus sign followed by a number and either:
-            // 1. It's the first token, or
-            // 2. The previous token was an operator
             if (token === '-' && 
                 i + 1 < tokens.length && 
                 !isNaN(tokens[i + 1]) && 
                 (i === 0 || ['+', '-', '*', '/'].includes(tokens[i - 1]))) {
                 processedTokens.push((-parseFloat(tokens[i + 1])).toString());
-                i++; // Skip the next token since we've processed it
+                i++; // Skip the next token
             } else {
                 processedTokens.push(token);
             }
         }
 
-        // First pass: handle multiplication and division
+        // First pass: multiplication and division
         for (let i = 1; i < processedTokens.length - 1; i += 2) {
             if (processedTokens[i] === '*' || processedTokens[i] === '/') {
                 const left = parseFloat(processedTokens[i - 1]);
@@ -343,7 +384,7 @@
             }
         }
 
-        // Second pass: handle addition and subtraction
+        // Second pass: addition and subtraction
         let result = parseFloat(processedTokens[0]);
         for (let i = 1; i < processedTokens.length - 1; i += 2) {
             const right = parseFloat(processedTokens[i + 1]);
@@ -410,7 +451,7 @@
      */
     calculateSquare() {
         if (this.currentInput === "") return;
-        this.operationString = `(${this.currentInput})��`;
+        this.operationString = `(${this.currentInput})`;
         this.currentInput = Math.pow(parseFloat(this.currentInput), 2).toString();
         this.isResultDisplayed = true;
         this.updateOperatorDisplay("");
@@ -636,6 +677,9 @@
             if (token === '(' || token === ')') {
                 return token;
             }
+            if (token === '%') {
+                return ` ${token}`; // Add space before %
+            }
             if (['+', '-', '*', '/'].includes(token)) {
                 return ` ${token} `;
             }
@@ -649,6 +693,32 @@
         }
         
         this.operationString = str;
+    }
+
+    /**
+     * Handles percentage calculations based on context
+     */
+    handlePercentage() {
+        if (this.isResultDisplayed) {
+            this.clear();
+        }
+
+        // Need current input to proceed
+        if (this.currentInput === "") return;
+
+        // Add current number to expression array
+        if (this.currentInput) {
+            this.expression.push(this.currentInput);
+        }
+        
+        // Add the percentage operator
+        this.expression.push('%');
+        
+        // Clear current input for next number
+        this.currentInput = "";
+        
+        this.buildOperationString();
+        this.updateDisplay();
     }
 }
 
