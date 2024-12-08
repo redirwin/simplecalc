@@ -103,3 +103,54 @@ The calculator supports various percentage operations for common real-world scen
 ## Technical Details
 
 Built using vanilla JavaScript with ES6 modules and follows Chrome Extension Manifest V3 guidelines. The calculator features a modular design with separate concerns for calculations, display formatting, and user input handling.
+
+## Keyboard Shortcuts
+
+The calculator supports comprehensive keyboard input:
+
+### Number Input
+- Main keyboard numbers (0-9)
+- Numpad numbers (0-9)
+
+### Basic Operators
+- Addition: + (main keyboard or numpad)
+- Subtraction: - (main keyboard or numpad)
+- Multiplication: * (main keyboard or numpad)
+- Division: / (main keyboard or numpad)
+
+### Special Functions
+- Square root: R
+- Square: S
+- Sign toggle: !
+- History panel: H
+- Percentage: %
+- Parentheses: ( and )
+
+### Control Keys
+- Calculate: Enter, =, numpad Enter, or numpad =
+- Clear: C, NumLock, Clear, or numpad Delete
+- Delete: Backspace or main keyboard Delete
+- Decimal point: . (main keyboard or numpad)
+
+### Navigation
+- Tab: Move between calculator buttons
+- Space: Activate focused button
+
+Note: The calculator supports both main keyboard and number pad input for numbers, operators, and basic controls. All keyboard shortcuts work regardless of keyboard focus position, except Space which activates the currently focused button.
+
+## Upcoming Features
+
+### Theme Options
+- Light/Dark mode toggle
+- Custom color schemes
+- High contrast mode for accessibility
+- Saved theme preferences
+
+### Custom Keyboard Mappings
+- User-configurable keyboard shortcuts
+- Import/Export keyboard mapping configurations
+- Multiple keyboard layout support
+- Conflict detection for custom mappings
+- Default mapping presets (Windows Calculator, Mac Calculator, etc.)
+
+Note: These features are under development. The current version uses default keyboard mappings as documented in the Keyboard Shortcuts section above.
