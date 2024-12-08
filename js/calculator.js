@@ -165,20 +165,6 @@
      * @param {string} op - The operation to set
      */
     setOperation(op) {
-        // Special case: handle minus sign as negative number indicator only when:
-        // 1. It's the first input, or
-        // 2. It follows another operator
-        const lastToken = this.expression[this.expression.length - 1];
-        const isFirstInput = this.expression.length === 0 && this.currentInput === "";
-        const followsOperator = ['+', '-', '*', '/'].includes(lastToken);
-        
-        if (op === "-" && (isFirstInput || followsOperator)) {
-            this.currentInput = "-";
-            this.buildOperationString();
-            this.updateDisplay();
-            return;
-        }
-
         // Handle as regular operation
         if (this.currentInput === "" && this.expression.length === 0) return;
 
@@ -192,6 +178,7 @@
         }
 
         // Update operator
+        const lastToken = this.expression[this.expression.length - 1];
         if (['+', '-', '*', '/'].includes(lastToken)) {
             this.expression[this.expression.length - 1] = op;
         } else {
