@@ -19,8 +19,13 @@
         this.expression = [];  // Array to store full expression tokens
         this.parenthesesCount = 0;
 
-        // Add history state
-        this.history = JSON.parse(localStorage.getItem('calculatorHistory') || '[]');
+        // Initialize history from localStorage or empty array if none exists
+        try {
+            this.history = JSON.parse(localStorage.getItem('calculatorHistory') || '[]');
+        } catch (e) {
+            this.history = [];
+            console.error('Error loading history:', e);
+        }
         
         // Initialize history UI elements
         this.historyList = document.querySelector(".history-list");
@@ -890,12 +895,16 @@
             timestamp: Date.now()
         };
 
-        this.history.unshift(historyEntry); // Add to start of array
-        if (this.history.length > 100) { // Limit history length
+        this.history.unshift(historyEntry);
+        if (this.history.length > 100) {
             this.history.pop();
         }
 
-        localStorage.setItem('calculatorHistory', JSON.stringify(this.history));
+        try {
+            localStorage.setItem('calculatorHistory', JSON.stringify(this.history));
+        } catch (e) {
+            console.error('Error saving history:', e);
+        }
         this.updateHistoryDisplay();
     }
 
