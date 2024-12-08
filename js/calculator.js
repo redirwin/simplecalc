@@ -271,39 +271,32 @@
     }
 
     /**
-     * Calculates the result of the current expression
+     * Performs the calculation based on current expression
      */
     calculate() {
-        // Handle empty calculator case
-        if (!this.currentInput && this.expression.length === 0) {
-            return;
-        }
-
         try {
-            // Create a copy of the expression array
-            let expressionToEvaluate = [...this.expression];
-            
-            // Add current input to expression if it exists
+            // Join the expression array with the current input
             if (this.currentInput) {
-                expressionToEvaluate.push(this.currentInput);
+                this.expression.push(this.currentInput);
             }
             
-            // Join the expression with spaces for evaluation
-            const operationString = expressionToEvaluate.join(' ');
+            // Create operation string before evaluation
+            const operationString = this.expression.join(' ');
             
-            // Calculate result
+            // Evaluate the expression
             const result = this.evaluateParentheses(operationString);
             
             // Format and display result
             this.currentInput = this.formatCalculationResult(result);
             this.expression = [];
             this.isResultDisplayed = true;
-            this.operationString = operationString; // Store for display
+            // Format the operation string with comma separation
+            this.operationString = operationString.replace(/\b\d+(\.\d+)?\b/g, match => this.formatNumber(match));
             this.updateDisplay();
             
             // Add successful calculation to history
             if (this.isResultDisplayed) {
-                this.addToHistory(operationString, this.currentInput);
+                this.addToHistory(this.operationString, this.currentInput);
             }
             
         } catch (error) {
@@ -889,8 +882,11 @@
      * @param {string} result - The calculation result
      */
     addToHistory(expression, result) {
+        // Format numbers within the expression
+        const formattedExpression = expression.replace(/\b\d+(\.\d+)?\b/g, match => this.formatNumber(match));
+        
         const historyEntry = {
-            expression,
+            expression: formattedExpression,
             result,
             timestamp: Date.now()
         };
