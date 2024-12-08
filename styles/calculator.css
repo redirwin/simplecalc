@@ -192,7 +192,7 @@ body {
     background: #fff;
     box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
     transition: right 0.3s ease-out;
-    z-index: 1000;
+    z-index: 1001;
     border-left: 1px solid #eee;
 }
 
@@ -260,7 +260,7 @@ body {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s;
-    z-index: 999;
+    z-index: 1000;
 }
 
 .history-overlay.show {

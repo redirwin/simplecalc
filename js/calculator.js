@@ -71,6 +71,19 @@
         document.querySelector(".history-close").addEventListener("click", () => {
             this.closeHistoryPanel();
         });
+
+        // Add keyboard trap for history panel
+        document.addEventListener('keydown', (e) => {
+            const historyPanel = document.querySelector(".history-panel");
+            if (!historyPanel.classList.contains('open')) return;
+
+            if (e.key === 'Tab') {
+                this.handleHistoryPanelTab(e);
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                this.closeHistoryPanel();
+            }
+        });
     }
 
     /**
@@ -174,13 +187,7 @@
                 this.calculateSquare();
                 break;
             case "history":
-                const historyPanel = document.querySelector(".history-panel");
-                const historyOverlay = document.querySelector(".history-overlay");
-                const historyButton = document.querySelector("[data-action='history']");
-                
-                historyPanel.classList.toggle("open");
-                historyOverlay.classList.toggle("show");
-                historyButton.classList.toggle("active");
+                this.openHistoryPanel();
                 break;
         }
     }
@@ -929,7 +936,58 @@
     }
 
     /**
-     * Close history panel
+     * Handles tab key navigation within history panel
+     * @param {KeyboardEvent} e - The keyboard event
+     */
+    handleHistoryPanelTab(e) {
+        const historyPanel = document.querySelector(".history-panel");
+        const focusableElements = historyPanel.querySelectorAll(
+            'button, [href], [tabindex="0"], .history-entry'
+        );
+        const firstFocusable = focusableElements[0];
+        const lastFocusable = focusableElements[focusableElements.length - 1];
+
+        // If shift + tab on first element, move to last
+        if (e.shiftKey && document.activeElement === firstFocusable) {
+            e.preventDefault();
+            lastFocusable.focus();
+        }
+        // If tab on last element, move to first
+        else if (!e.shiftKey && document.activeElement === lastFocusable) {
+            e.preventDefault();
+            firstFocusable.focus();
+        }
+        // Prevent tabbing to elements outside panel
+        else if (!Array.from(focusableElements).includes(document.activeElement)) {
+            e.preventDefault();
+            firstFocusable.focus();
+        }
+    }
+
+    /**
+     * Opens history panel and sets initial focus
+     */
+    openHistoryPanel() {
+        const historyPanel = document.querySelector(".history-panel");
+        const historyOverlay = document.querySelector(".history-overlay");
+        const historyButton = document.querySelector("[data-action='history']");
+        
+        // Store the element that had focus before opening panel
+        this.lastFocusedElement = document.activeElement;
+        
+        historyPanel.classList.add("open");
+        historyOverlay.classList.add("show");
+        historyButton.classList.add("active");
+
+        // Set focus to first history entry or clear button
+        const firstFocusable = historyPanel.querySelector('.history-entry, .history-clear');
+        if (firstFocusable) {
+            firstFocusable.focus();
+        }
+    }
+
+    /**
+     * Close history panel and restore focus
      */
     closeHistoryPanel() {
         const historyPanel = document.querySelector(".history-panel");
@@ -939,6 +997,11 @@
         historyPanel.classList.remove("open");
         historyOverlay.classList.remove("show");
         historyButton.classList.remove("active");
+
+        // Restore focus to last focused element
+        if (this.lastFocusedElement) {
+            this.lastFocusedElement.focus();
+        }
     }
 
     /**
@@ -972,24 +1035,45 @@
         
         this.historyList.innerHTML = this.history.length ? 
             this.history.map((entry, index) => `
-                <div class="history-entry" data-index="${index}">
+                <div class="history-entry" 
+                     data-index="${index}" 
+                     tabindex="0" 
+                     role="button" 
+                     aria-label="Restore calculation: ${entry.displayExpression} ${this.formatNumber(entry.result)}">
                     <div class="history-expression">${entry.displayExpression}</div>
                     <div class="history-result">${this.formatNumber(entry.result)}</div>
                 </div>
             `).join('') : 
             '<div class="history-empty">No calculations yet</div>';
 
-        // Add click listeners to history entries
+        // Add click and keyboard listeners to history entries
         document.querySelectorAll('.history-entry').forEach(entry => {
+            // Click handler
             entry.addEventListener('click', () => {
-                const historyEntry = this.history[entry.dataset.index];
-                this.currentInput = historyEntry.result;
-                this.isResultDisplayed = true;
-                this.operationString = historyEntry.expression;  // Use clean expression for restoration
-                this.updateDisplay();
-                this.closeHistoryPanel();
+                this.restoreHistoryEntry(parseInt(entry.dataset.index));
+            });
+
+            // Keyboard handler
+            entry.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault(); // Prevent page scroll on space
+                    this.restoreHistoryEntry(parseInt(entry.dataset.index));
+                }
             });
         });
+    }
+
+    /**
+     * Restores a history entry to the calculator
+     * @param {number} index - The index of the history entry to restore
+     */
+    restoreHistoryEntry(index) {
+        const historyEntry = this.history[index];
+        this.currentInput = historyEntry.result;
+        this.isResultDisplayed = true;
+        this.operationString = historyEntry.expression;
+        this.updateDisplay();
+        this.closeHistoryPanel();
     }
 
     /**
@@ -999,6 +1083,7 @@
         this.history = [];
         localStorage.removeItem('calculatorHistory');
         this.updateHistoryDisplay();
+        this.closeHistoryPanel();
     }
 
     /**
@@ -1011,5 +1096,4 @@
     }
 }
 
-// Change to default export
 export default Calculator; 
