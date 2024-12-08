@@ -154,3 +154,8 @@ body {
     background: #6A5ACD;
     font-size: 1.2rem;
 }
+
+/* Add this to your existing CSS */
+.span-2 {
+    grid-column: span 2;
+}

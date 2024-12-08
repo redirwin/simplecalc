@@ -13,30 +13,29 @@
             <input type="text" id="display" disabled>
         </div>
         <div class="calculator-buttons">
-            <!-- New top row -->
+            <!-- Top row - Clear/Edit Functions -->
+            <button class="calculator-button clear" data-action="clear">C</button>
             <button class="calculator-button special" data-action="delete">DEL</button>
             <button class="calculator-button special" data-action="parenthesis">( )</button>
             <button class="calculator-button special" data-action="percent">%</button>
 
-            <!-- Original top row -->
+            <!-- Second row - Advanced Math -->
             <button class="calculator-button special" data-action="sqrt">√</button>
             <button class="calculator-button special" data-action="square">x²</button>
             <button class="calculator-button special" data-action="toggleSign">+/-</button>
             <button class="calculator-button operator" data-operation="/">÷</button>
 
-            <!-- Second row -->
+            <!-- Main Grid - Numbers & Basic Operations -->
             <button class="calculator-button" data-number="7">7</button>
             <button class="calculator-button" data-number="8">8</button>
             <button class="calculator-button" data-number="9">9</button>
             <button class="calculator-button operator" data-operation="*">×</button>
 
-            <!-- Third row -->
             <button class="calculator-button" data-number="4">4</button>
             <button class="calculator-button" data-number="5">5</button>
             <button class="calculator-button" data-number="6">6</button>
             <button class="calculator-button operator" data-operation="-">−</button>
 
-            <!-- Fourth row -->
             <button class="calculator-button" data-number="1">1</button>
             <button class="calculator-button" data-number="2">2</button>
             <button class="calculator-button" data-number="3">3</button>
@@ -45,8 +44,7 @@
             <!-- Bottom row -->
             <button class="calculator-button" data-number="0">0</button>
             <button class="calculator-button decimal" data-action="decimal">.</button>
-            <button class="calculator-button clear" data-action="clear">C</button>
-            <button class="calculator-button equals" data-action="calculate">=</button>
+            <button class="calculator-button equals span-2" data-action="calculate">=</button>
         </div>
     </div>
     <script type="module" src="js/init.js"></script>
