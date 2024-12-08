@@ -490,9 +490,11 @@
             this.display.value = this.formatNumber(this.currentInput);
             this.operatorDisplay.textContent = `${this.operationString} =`;
         } else {
-            // Always show the operation string if it exists
+            // Format the display value while keeping the operation string unformatted
             if (this.operationString) {
-                this.display.value = this.operationString;
+                // Format only the numbers in the display, not in the stored operation string
+                const formattedDisplay = this.operationString.replace(/\b\d+(\.\d+)?\b/g, match => this.formatNumber(match));
+                this.display.value = formattedDisplay;
             } else {
                 this.display.value = this.formatNumber(this.currentInput || "0");
             }
