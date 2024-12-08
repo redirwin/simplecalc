@@ -235,30 +235,39 @@
     }
 
     /**
-     * Performs the calculation respecting parentheses and order of operations
+     * Calculates the result of the current expression
      */
     calculate() {
-        if (this.currentInput) {
-            this.expression.push(this.currentInput);
+        // Handle empty calculator case
+        if (!this.currentInput && this.expression.length === 0) {
+            return;
         }
 
-        const fullExpression = this.operationString;
-        
         try {
-            // First evaluate parentheses
-            let result = this.evaluateParentheses(fullExpression);
+            // Create a copy of the expression array
+            let expressionToEvaluate = [...this.expression];
             
-            // Format and store result
+            // Add current input to expression if it exists
+            if (this.currentInput) {
+                expressionToEvaluate.push(this.currentInput);
+            }
+            
+            // Join the expression with spaces for evaluation
+            const operationString = expressionToEvaluate.join(' ');
+            
+            // Calculate result
+            const result = this.evaluateParentheses(operationString);
+            
+            // Format and display result
             this.currentInput = this.formatCalculationResult(result);
-            this.operationString = fullExpression;
-            this.isResultDisplayed = true;
             this.expression = [];
+            this.isResultDisplayed = true;
+            this.operationString = operationString; // Store for display
             this.updateDisplay();
+            
         } catch (error) {
-            console.error('Calculation error:', error);
             this.currentInput = "Error";
-            // Keep the original expression in the operator display
-            this.operatorDisplay.textContent = `${fullExpression} =`;
+            this.expression = [];
             this.isResultDisplayed = true;
             this.updateDisplay();
         }
