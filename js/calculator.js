@@ -44,6 +44,16 @@
 
         // Add keyboard support
         document.addEventListener("keydown", (e) => this.handleKeyboardInput(e));
+
+        // Close history panel when clicking overlay
+        document.querySelector(".history-overlay").addEventListener("click", () => {
+            this.closeHistoryPanel();
+        });
+
+        // Close history panel when clicking close button
+        document.querySelector(".history-close").addEventListener("click", () => {
+            this.closeHistoryPanel();
+        });
     }
 
     /**
@@ -102,6 +112,15 @@
                 break;
             case "square":
                 this.calculateSquare();
+                break;
+            case "history":
+                const historyPanel = document.querySelector(".history-panel");
+                const historyOverlay = document.querySelector(".history-overlay");
+                const historyButton = document.querySelector("[data-action='history']");
+                
+                historyPanel.classList.toggle("open");
+                historyOverlay.classList.toggle("show");
+                historyButton.classList.toggle("active");
                 break;
         }
     }
@@ -754,6 +773,19 @@
         
         this.buildOperationString();
         this.updateDisplay();
+    }
+
+    /**
+     * Close history panel
+     */
+    closeHistoryPanel() {
+        const historyPanel = document.querySelector(".history-panel");
+        const historyOverlay = document.querySelector(".history-overlay");
+        const historyButton = document.querySelector("[data-action='history']");
+        
+        historyPanel.classList.remove("open");
+        historyOverlay.classList.remove("show");
+        historyButton.classList.remove("active");
     }
 }
 

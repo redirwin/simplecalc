@@ -5,6 +5,8 @@ body {
     width: 320px;
     background-color: #f4f4f9;
     font-family: Arial, sans-serif;
+    overflow-x: hidden;
+    position: relative;
 }
 
 .calculator {
@@ -184,4 +186,111 @@ body {
 /* Add this to your existing CSS */
 .span-2 {
     grid-column: span 2;
+}
+
+/* History Panel */
+.history-panel {
+    position: fixed;
+    top: 0;
+    right: -300px; /* Start off-screen */
+    width: 300px;
+    height: 100%;
+    background: #fff;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    transition: right 0.3s ease-out;
+    z-index: 1000;
+    border-left: 1px solid #eee;
+}
+
+.history-panel.open {
+    right: 0;
+}
+
+.history-header {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.history-clear {
+    background: none;
+    border: none;
+    color: #e63946;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.history-clear:hover {
+    background: #fff1f1;
+}
+
+.history-list {
+    padding: 15px;
+    overflow-y: auto;
+    height: calc(100% - 60px);
+}
+
+/* Update history button styles */
+.calculator-button[data-action="history"] {
+    background: #20B2AA;
+    font-size: 1.2rem;
+}
+
+.calculator-button[data-action="history"]:active {
+    background: #1A968F;
+}
+
+.calculator-button[data-action="history"].active {
+    background: #1A968F;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Add overlay for clicking outside */
+.history-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s;
+    z-index: 999;
+}
+
+.history-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Update header to accommodate close button */
+.history-header-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.history-close {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 1.5rem;
+    padding: 0 5px;
+    line-height: 1;
+}
+
+.history-close:hover {
+    color: #333;
 }
