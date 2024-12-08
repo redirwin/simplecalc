@@ -37,6 +37,7 @@
         });
 
         this.initializeEventListeners();
+        this.initializeTooltips();
     }
 
     /**
@@ -57,9 +58,23 @@
                     this.handleAction(action);
                 }
             });
+
+            // Space for button activation
+            button.addEventListener("keydown", (e) => {
+                if (e.key === " ") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (button.dataset.action === "parenthesis") {
+                        this.handleParenthesis();
+                    } else {
+                        button.click();
+                    }
+                }
+            });
         });
 
-        // Add keyboard support
+        // Add keyboard support at document level
         document.addEventListener("keydown", (e) => this.handleKeyboardInput(e));
 
         // Close history panel when clicking overlay
@@ -91,31 +106,78 @@
      * @param {KeyboardEvent} e - Keyboard event
      */
     handleKeyboardInput(e) {
-        if (e.key >= "0" && e.key <= "9") {
-            this.handleNumber(e.key);
-        } else if (e.key === ".") {
+        // Skip keyboard handling if history panel is open
+        const historyPanel = document.querySelector(".history-panel");
+        if (historyPanel.classList.contains('open')) return;
+
+        // Skip Space when focus is on calculator button
+        if (e.target.classList.contains('calculator-button') && e.key === " ") {
+            return;
+        }
+
+        // Handle numbers (both regular and numpad)
+        if ((e.key >= "0" && e.key <= "9") || 
+            (e.code >= "Numpad0" && e.code <= "Numpad9")) {
+            const num = e.code.startsWith("Numpad") ? 
+                e.code.slice(-1) : e.key;
+            this.handleNumber(num);
+        } 
+        // Handle decimal point (both regular and numpad)
+        else if (e.key === "." || e.code === "NumpadDecimal") {
             this.handleAction("decimal");
-        } else if (["+", "-", "*", "/"].includes(e.key)) {
-            this.setOperation(e.key);
-        } else if (e.key === "Enter" || e.key === "=") {
+        } 
+        // Handle operators (both regular and numpad)
+        else if (["+", "-", "*", "/"].includes(e.key) || 
+                 ["NumpadAdd", "NumpadSubtract", "NumpadMultiply", "NumpadDivide"].includes(e.code)) {
+            const opMap = {
+                "NumpadAdd": "+",
+                "NumpadSubtract": "-",
+                "NumpadMultiply": "*",
+                "NumpadDivide": "/"
+            };
+            const op = e.code in opMap ? opMap[e.code] : e.key;
+            this.setOperation(op);
+        } 
+        // Handle equals/enter (both regular and numpad)
+        else if (e.key === "=" || e.code === "NumpadEqual" || 
+                 e.key === "Enter" || e.code === "NumpadEnter") {
             e.preventDefault();
-            this.handleAction("calculate");
-        } else if (e.key === "Escape") {
+            if (this.hasValidExpression()) {
+                this.handleAction("calculate");
+            }
+        } else if (e.key.toLowerCase() === "c" || 
+                   e.code === "NumLock" || 
+                   (e.code === "Delete" && e.code.startsWith("Numpad"))) {
+            e.preventDefault();
             this.handleAction("clear");
-        } else if (e.key === "Backspace" || e.key === "Delete") {
+        } else if (e.key === "Backspace" || 
+                   (e.key === "Delete" && !e.code.startsWith("Numpad"))) {
             this.handleAction("delete");
         } else if (e.key === "%") {
             e.preventDefault();
             this.handleAction("percent");
         } else if (e.key === "(" || e.key === ")") {
             this.handleKeyboardParenthesis(e.key);
-        } else if (e.key.toLowerCase() === "r") {  // 'r' for square root (√)
+        } else if (e.key.toLowerCase() === "r") {
             this.handleAction("sqrt");
-        } else if (e.key.toLowerCase() === "s") {  // 's' for square (x²)
+        } else if (e.key.toLowerCase() === "s") {
             this.handleAction("square");
-        } else if (e.key === "!") {  // '!' for sign toggle (+/-)
+        } else if (e.key === "!") {
             this.handleAction("toggleSign");
+        } else if (e.key.toLowerCase() === "h") {
+            this.handleAction("history");
         }
+    }
+
+    /**
+     * Check if there's a valid expression to evaluate
+     * @returns {boolean}
+     */
+    hasValidExpression() {
+        return (
+            (this.currentInput && this.currentInput !== "0") || 
+            this.expression.length > 0
+        );
     }
 
     /**
@@ -1039,7 +1101,8 @@
                      data-index="${index}" 
                      tabindex="0" 
                      role="button" 
-                     aria-label="Restore calculation: ${entry.displayExpression} ${this.formatNumber(entry.result)}">
+                     aria-label="Restore calculation: ${entry.displayExpression} ${this.formatNumber(entry.result)}"
+                     title="Press Enter to restore this calculation">
                     <div class="history-expression">${entry.displayExpression}</div>
                     <div class="history-result">${this.formatNumber(entry.result)}</div>
                 </div>
@@ -1048,15 +1111,13 @@
 
         // Add click and keyboard listeners to history entries
         document.querySelectorAll('.history-entry').forEach(entry => {
-            // Click handler
             entry.addEventListener('click', () => {
                 this.restoreHistoryEntry(parseInt(entry.dataset.index));
             });
 
-            // Keyboard handler
             entry.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault(); // Prevent page scroll on space
+                if (e.key === "Enter" && !e.ctrlKey || e.key === " ") {
+                    e.preventDefault();
                     this.restoreHistoryEntry(parseInt(entry.dataset.index));
                 }
             });
@@ -1093,6 +1154,48 @@
      */
     formatOperatorDisplay(expression) {
         return expression.replace(/\//g, '÷').replace(/\*/g, '×');
+    }
+
+    /**
+     * Initialize tooltips for calculator buttons
+     */
+    initializeTooltips() {
+        const tooltips = {
+            'history': 'History (H)',
+            'delete': 'Backspace',
+            'parenthesis': '( or )',
+            'percent': '%',
+            'sqrt': 'Square Root (R)',
+            'square': 'Square (S)',
+            'toggleSign': 'Toggle Sign (!)',
+            'clear': 'Clear (Esc)',
+            'calculate': 'Calculate (Enter or =)',
+            'decimal': 'Decimal (.)'
+        };
+
+        const operatorTooltips = {
+            '+': 'Add (+)',
+            '-': 'Subtract (-)',
+            '*': 'Multiply (*)',
+            '/': 'Divide (/)'
+        };
+
+        document.querySelectorAll('.calculator-button').forEach(button => {
+            let tooltip = '';
+            
+            if (button.dataset.action) {
+                tooltip = tooltips[button.dataset.action] || '';
+            } else if (button.dataset.operation) {
+                tooltip = operatorTooltips[button.dataset.operation] || '';
+            } else if (button.dataset.number) {
+                tooltip = `Number (${button.dataset.number})`;
+            }
+
+            if (tooltip) {
+                button.setAttribute('title', tooltip);
+                button.setAttribute('aria-label', tooltip);
+            }
+        });
     }
 }
 
