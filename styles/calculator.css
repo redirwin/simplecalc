@@ -159,12 +159,6 @@ body {
     animation: shake 0.2s ease-in-out, flashBorder 0.5s ease-in-out;
 }
 
-/* Style for delete button */
-.calculator-button[data-action="delete"] {
-    background: #e63946;
-    font-size: 1rem;
-}
-
 /* Style for parentheses and percent */
 .calculator-button[data-action="leftParen"],
 .calculator-button[data-action="rightParen"],
@@ -337,4 +331,11 @@ body {
 
 .history-list {
     padding: 0;
+}
+
+.calculator-button[data-action="delete"] {
+    background-color: #e63946;
+    color: white;
+    font-size: 25px;
+    display: flex;
 }
