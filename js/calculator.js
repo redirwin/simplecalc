@@ -920,6 +920,8 @@
                 const historyEntry = this.history[entry.dataset.index];
                 this.currentInput = historyEntry.result;
                 this.isResultDisplayed = true;
+                // Set the full expression in the operator display
+                this.operationString = historyEntry.expression;
                 this.updateDisplay();
                 this.closeHistoryPanel();
             });
