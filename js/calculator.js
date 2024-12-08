@@ -94,7 +94,45 @@
         } else if (e.key === "%") {
             e.preventDefault();
             this.handleAction("percent");
+        } else if (e.key === "(" || e.key === ")") {
+            // Direct parenthesis input from keyboard
+            this.handleKeyboardParenthesis(e.key);
         }
+    }
+
+    /**
+     * Handles direct parenthesis input from keyboard
+     * @param {string} key - The parenthesis key pressed
+     */
+    handleKeyboardParenthesis(key) {
+        if (this.isResultDisplayed) {
+            this.clear();
+        }
+
+        // Add current input to expression if it exists
+        if (this.currentInput) {
+            // Handle implicit multiplication for opening parenthesis
+            if (key === "(" && !isNaN(this.currentInput)) {
+                this.expression.push(this.currentInput);
+                this.expression.push("*");
+            } else {
+                this.expression.push(this.currentInput);
+            }
+            this.currentInput = "";
+        }
+
+        // Update parentheses count
+        if (key === "(") {
+            this.parenthesesCount++;
+        } else {
+            // Only allow closing if we have open parentheses
+            if (this.parenthesesCount <= 0) return;
+            this.parenthesesCount--;
+        }
+
+        this.expression.push(key);
+        this.buildOperationString();
+        this.updateDisplay();
     }
 
     /**

@@ -5,7 +5,11 @@ A lightweight, efficient calculator extension for Chrome that provides essential
 ## Features
 
 - Basic arithmetic operations (+, -, ×, ÷)
-- Advanced functions (square root, square, sign toggle)
+- Advanced functions:
+  - Square root (√)
+  - Square (x²)
+  - Sign toggle (+/-)
+  - History tracking
 - Comprehensive percentage calculations
 - Support for parentheses and order of operations
 - Keyboard support
@@ -37,6 +41,21 @@ A lightweight, efficient calculator extension for Chrome that provides essential
   - Enter/= for calculation
   - Escape for clear
   - Decimal point (.)
+  - Backspace/Delete for deletion
+
+### Display Features
+- Main display with automatic horizontal scrolling
+- Secondary display appears automatically for overflow expressions
+- Comma-separated numbers for better readability
+- Scientific notation for very large or small numbers
+- Visual feedback for digit limit (15 digits maximum)
+
+### History Feature
+- Access calculation history with the "H" button
+- Click any history entry to restore the calculation
+- Clear history with one click
+- Persists between sessions
+- Stores up to 100 recent calculations
 
 ### Order of Operations
 
