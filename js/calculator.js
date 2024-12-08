@@ -129,6 +129,14 @@
                 this.closeHistoryPanel();
             }
         });
+
+        // Add to existing event listeners
+        document.addEventListener('keydown', (e) => {
+            // Handle arrow navigation
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                this.handleArrowNavigation(e);
+            }
+        });
     }
 
     /**
@@ -1202,7 +1210,7 @@
      * @returns {string} - Formatted expression
      */
     formatOperatorDisplay(expression) {
-        return expression.replace(/\//g, '÷').replace(/\*/g, '×');
+        return expression.replace(/\//g, '÷').replace(/\*/g, '��');
     }
 
     /**
@@ -1370,6 +1378,67 @@
                 overlay.classList.add("show");
                 this.activePanel = panelType;
             }
+        }
+    }
+
+    /**
+     * Handle arrow key navigation between calculator buttons
+     * @param {KeyboardEvent} e - Keyboard event
+     */
+    handleArrowNavigation(e) {
+        // Skip arrow navigation if any panel is open
+        if (this.activePanel) return;
+
+        const currentFocus = document.activeElement;
+        if (!currentFocus.classList.contains('calculator-button')) {
+            // If no button is focused, focus the '5' button as a central starting point
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                e.preventDefault();
+                document.querySelector('[data-number="5"]').focus();
+                return;
+            }
+            return;
+        }
+
+        e.preventDefault(); // Prevent page scrolling
+
+        // Get all calculator buttons in document order
+        const buttons = Array.from(document.querySelectorAll('.calculator-button'));
+        const currentIndex = buttons.indexOf(currentFocus);
+        const buttonsPerRow = 4; // Our calculator has 4 buttons per row
+
+        let nextIndex;
+        switch (e.key) {
+            case 'ArrowRight':
+                nextIndex = currentIndex + 1;
+                if (nextIndex >= buttons.length) nextIndex = 0;
+                break;
+            case 'ArrowLeft':
+                nextIndex = currentIndex - 1;
+                if (nextIndex < 0) nextIndex = buttons.length - 1;
+                break;
+            case 'ArrowDown':
+                nextIndex = currentIndex + buttonsPerRow;
+                if (nextIndex >= buttons.length) {
+                    // Wrap to top of same column
+                    nextIndex = currentIndex % buttonsPerRow;
+                }
+                break;
+            case 'ArrowUp':
+                nextIndex = currentIndex - buttonsPerRow;
+                if (nextIndex < 0) {
+                    // Wrap to bottom of same column
+                    const numRows = Math.ceil(buttons.length / buttonsPerRow);
+                    nextIndex = currentIndex + (buttonsPerRow * (numRows - 1));
+                    if (nextIndex >= buttons.length) {
+                        nextIndex -= buttonsPerRow;
+                    }
+                }
+                break;
+        }
+
+        if (nextIndex !== undefined) {
+            buttons[nextIndex].focus();
         }
     }
 }

@@ -53,6 +53,9 @@ A lightweight, efficient calculator extension for Chrome that provides essential
     - Calculate (Enter or =)
     - Clear (Escape)
     - Delete (Backspace or Delete)
+  - Navigation:
+    - Arrow keys and tab
+    - Space to press focused button
   - Panels:
     - History panel toggle: (h/H)
     - Help panel toggle: (F1)
