@@ -15,6 +15,8 @@ body {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     box-sizing: border-box;
     min-height: 450px;
+    position: relative;
+    overflow: hidden;
 }
 
 .calculator-display {
@@ -167,6 +169,16 @@ body {
 .calculator-button[data-action="percent"] {
     background: #6A5ACD;
     font-size: 1.2rem;
+}
+
+/* Style for history button */
+.calculator-button[data-action="history"] {
+    background: #20B2AA;
+    font-size: 1.2rem;
+}
+
+.calculator-button[data-action="history"]:active {
+    background: #1A968F;
 }
 
 /* Add this to your existing CSS */

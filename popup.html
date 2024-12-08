@@ -13,8 +13,8 @@
             <input type="text" id="display" disabled>
         </div>
         <div class="calculator-buttons">
-            <!-- Top row - Clear/Edit Functions -->
-            <button class="calculator-button clear" data-action="clear">C</button>
+            <!-- Top row - History/Edit Functions -->
+            <button class="calculator-button special" data-action="history">H</button>
             <button class="calculator-button special" data-action="delete">DEL</button>
             <button class="calculator-button special" data-action="parenthesis">( )</button>
             <button class="calculator-button special" data-action="percent">%</button>
@@ -44,7 +44,8 @@
             <!-- Bottom row -->
             <button class="calculator-button" data-number="0">0</button>
             <button class="calculator-button decimal" data-action="decimal">.</button>
-            <button class="calculator-button equals span-2" data-action="calculate">=</button>
+            <button class="calculator-button clear" data-action="clear">C</button>
+            <button class="calculator-button equals" data-action="calculate">=</button>
         </div>
     </div>
     <script type="module" src="js/init.js"></script>
