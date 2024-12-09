@@ -282,7 +282,7 @@
             case "parenthesis":
                 this.handleParenthesis();
                 break;
-            case "percent":  // Make sure this case exists and is correct
+            case "percent":
                 this.handlePercentage();
                 break;
             case "sqrt":
@@ -342,42 +342,42 @@
         // Only add decimal if one doesn't exist
         if (!this.currentInput.includes('.')) {
             this.currentInput += '.';
-            this.updateDisplay();
+            this.buildOperationString();  // Rebuild operation string with new decimal
+            this.updateDisplay();  // Force display update
         }
     }
 
     /**
-     * Set the current operation
+     * Sets the operation and updates the display
      * @param {string} op - The operation to set
      */
     setOperation(op) {
-        if (this.currentInput === "") {
-            // If no current input, use "0" as the starting number
-            this.currentInput = "0";
-        }
-
-        // Handle as regular operation
-        if (this.currentInput === "" && this.expression.length === 0) return;
-
         if (this.isResultDisplayed) {
-            this.expression = [this.currentInput];
-            this.currentInput = "";
             this.isResultDisplayed = false;
-        } else if (this.currentInput) {
-            this.expression.push(this.currentInput);
-            this.currentInput = "";
         }
 
-        // Update operator
-        const lastToken = this.expression[this.expression.length - 1];
-        if (['+', '-', '*', '/'].includes(lastToken)) {
-            this.expression[this.expression.length - 1] = op;
-        } else {
-            this.expression.push(op);
+        // If current input ends with a decimal point and no numbers after it,
+        // trim the decimal before adding the operator
+        if (this.currentInput.endsWith('.')) {
+            this.currentInput = this.currentInput.slice(0, -1);
         }
-        
-        this.buildOperationString();
-        this.updateDisplay();
+
+        // Add current input and operator to expression
+        if (this.currentInput || this.currentInput === "0") {
+            this.expression.push(this.currentInput);
+            this.expression.push(op);
+            this.currentInput = "";
+            this.buildOperationString();
+            this.updateDisplay();
+        } 
+        // Handle case where operator is changed
+        else if (this.expression.length > 0) {
+            if (this.isOperator(this.expression[this.expression.length - 1])) {
+                this.expression[this.expression.length - 1] = op;
+                this.buildOperationString();
+                this.updateDisplay();
+            }
+        }
     }
 
     /**
@@ -426,6 +426,11 @@
      */
     calculate() {
         try {
+            // If there's a current input with trailing decimal, trim it
+            if (this.currentInput && this.currentInput.endsWith('.')) {
+                this.currentInput = this.currentInput.slice(0, -1);
+            }
+
             // Join the expression array with the current input
             if (this.currentInput) {
                 // Check for implicit multiplication before adding current input
@@ -460,19 +465,16 @@
             
             this.updateDisplay();
             
-            // Add successful calculation to history with correct formatting
+            // Fix: Add to history with proper expression formatting
             if (this.isResultDisplayed) {
                 this.addToHistory({
                     expression: this.operationString,
-                    displayExpression: `${this.operationString} =`,
+                    displayExpression: `${this.operationString} =`,  // Add display version
                     result: this.currentInput
                 });
             }
-            
         } catch (error) {
             this.currentInput = "Error";
-            this.expression = [];
-            this.isResultDisplayed = true;
             this.updateDisplay();
         }
     }
