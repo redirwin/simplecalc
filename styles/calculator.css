@@ -159,8 +159,6 @@ body {
 }
 
 /* Style for parentheses and percent */
-.calculator-button[data-action="leftParen"],
-.calculator-button[data-action="rightParen"],
 .calculator-button[data-action="percent"] {
     background: #563d7c;
     font-size: 1.2rem;
@@ -179,11 +177,6 @@ body {
 .calculator-button[data-action="history"].active {
     background: #166328;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-}
-
-/* Add this to your existing CSS */
-.span-2 {
-    grid-column: span 2;
 }
 
 /* History Panel */
@@ -274,7 +267,6 @@ body {
     visibility: visible;
 }
 
-/* Update header to accommodate close button */
 .history-header-buttons {
     display: flex;
     gap: 10px;
@@ -329,7 +321,6 @@ body {
     white-space: nowrap;
 }
 
-/* Add hover behavior to show full expression */
 .history-entry:hover .history-expression {
     white-space: normal;  /* Allow wrapping on hover */
     word-break: break-all;  /* Break long numbers if needed */
@@ -674,21 +665,6 @@ body {
 }
 
 /* Panel styles */
-.info-panel,
-.about-panel {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
-    background: #fff;
-    box-shadow: none;
-    transition: transform 0.3s ease-out;
-    transform: translateX(100%);
-    z-index: 1001;
-}
-
 .info-panel.open,
 .about-panel.open {
     transform: translateX(0);
@@ -754,16 +730,6 @@ body {
 .about-overlay.show {
     opacity: 1;
     visibility: visible;
-}
-
-/* Remove all tooltip-related styles */
-[title],
-[title]:hover::before,
-.calculator-button[title]:hover::before,
-.calculator-utilities button::before,
-.calculator-utilities button::after,
-.calculator-button[data-action="decimal"]:hover::before {
-    content: none;
 }
 
 /* Keep only essential button styling */
