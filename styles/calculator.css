@@ -806,3 +806,97 @@ body {
 .calculator-button[data-operation="/"] {
     font-size: 1.6rem;  /* Slightly larger for ÷ symbol */
 }
+
+/* Support Button Styles */
+.support-button {
+    background: none;
+    border: none;
+    color: #e91e63;  /* A nice pink/red for the heart */
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 5px 10px;
+    transition: background-color 0.3s;
+    border-radius: 4px;
+}
+
+.support-button:hover {
+    background: rgba(233, 30, 99, 0.2);
+}
+
+.support-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(233, 30, 99, 0.4);
+}
+
+/* Support Panel Styles */
+.support-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    box-shadow: none;
+    transition: transform 0.3s ease-out;
+    transform: translateX(100%);
+    z-index: 1001;
+}
+
+.support-panel.open {
+    transform: translateX(0);
+}
+
+.support-header {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.support-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.support-close {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 1.5rem;
+    padding: 0 5px;
+    line-height: 1;
+}
+
+.support-close:hover {
+    color: #333;
+}
+
+.support-content {
+    padding: 20px;
+    overflow-y: auto;
+    height: calc(100% - 60px);
+    line-height: 1.6;
+}
+
+/* Support Panel Overlay */
+.support-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s;
+    z-index: 1000;
+}
+
+.support-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}

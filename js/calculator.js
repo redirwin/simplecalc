@@ -1261,6 +1261,7 @@
         // Set aria-labels for utility buttons
         document.querySelector('.info-button').setAttribute('aria-label', 'Information and Help (Press F1)');
         document.querySelector('.about-button').setAttribute('aria-label', 'About Calculator (Press F2)');
+        document.querySelector('.support-button').setAttribute('aria-label', 'Buy me a Dr. Pepper (Press F3)');
     }
 
     /**
@@ -1309,6 +1310,19 @@
             this.togglePanel("about");
         });
 
+        // Dr. Pepper support panel
+        document.querySelector(".support-button").addEventListener("click", () => {
+            this.togglePanel("support");
+        });
+        
+        document.querySelector(".support-close").addEventListener("click", () => {
+            this.togglePanel("support");
+        });
+        
+        document.querySelector(".support-overlay").addEventListener("click", () => {
+            this.togglePanel("support");
+        });
+
         // History panel
         document.querySelector("[data-action='history']").addEventListener("click", () => {
             this.togglePanel("history");
@@ -1330,17 +1344,21 @@
             } else if (e.key === "F2") {
                 e.preventDefault();
                 this.togglePanel("about");
-            } else if (e.key.toLowerCase() === "h") {  // Handle both upper and lowercase H
+            } else if (e.key === "F3") {  // Add F3 shortcut for support panel
+                e.preventDefault();
+                this.togglePanel("support");
+            } else if (e.key.toLowerCase() === "h") {
                 e.preventDefault();
                 this.togglePanel("history");
             } else if (e.key === "Escape") {
                 // Check if any panel is open
                 const infoOpen = document.querySelector(".info-panel.open");
                 const aboutOpen = document.querySelector(".about-panel.open");
+                const supportOpen = document.querySelector(".support-panel.open");
                 const historyOpen = document.querySelector(".history-panel.open");
                 
-                if (infoOpen || aboutOpen || historyOpen) {
-                    e.preventDefault(); // Prevent extension popup from closing
+                if (infoOpen || aboutOpen || supportOpen || historyOpen) {
+                    e.preventDefault();
                     if (this.activePanel) {
                         this.togglePanel(this.activePanel);
                     }
