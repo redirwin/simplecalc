@@ -807,11 +807,11 @@ body {
     font-size: 1.6rem;  /* Slightly larger for ÷ symbol */
 }
 
-/* Support Button Styles */
-.support-button {
+/* Thanks Button Styles */
+.thanks-button {
     background: none;
     border: none;
-    color: #e91e63;  /* A nice pink/red for the heart */
+    color: #e91e63;
     cursor: pointer;
     font-size: 1.2rem;
     padding: 5px 10px;
@@ -819,17 +819,17 @@ body {
     border-radius: 4px;
 }
 
-.support-button:hover {
+.thanks-button:hover {
     background: rgba(233, 30, 99, 0.2);
 }
 
-.support-button:focus {
+.thanks-button:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(233, 30, 99, 0.4);
 }
 
-/* Support Panel Styles */
-.support-panel {
+/* Thanks Panel Styles */
+.thanks-panel {
     position: fixed;
     top: 0;
     left: 0;
@@ -843,11 +843,11 @@ body {
     z-index: 1001;
 }
 
-.support-panel.open {
+.thanks-panel.open {
     transform: translateX(0);
 }
 
-.support-header {
+.thanks-header {
     padding: 15px;
     border-bottom: 1px solid #eee;
     display: flex;
@@ -855,13 +855,13 @@ body {
     align-items: center;
 }
 
-.support-header h2 {
+.thanks-header h2 {
     margin: 0;
     font-size: 1.2rem;
     color: #333;
 }
 
-.support-close {
+.thanks-close {
     background: none;
     border: none;
     color: #666;
@@ -871,19 +871,19 @@ body {
     line-height: 1;
 }
 
-.support-close:hover {
+.thanks-close:hover {
     color: #333;
 }
 
-.support-content {
+.thanks-content {
     padding: 20px;
     overflow-y: auto;
     height: calc(100% - 60px);
     line-height: 1.6;
 }
 
-/* Support Panel Overlay */
-.support-overlay {
+/* Thanks Panel Overlay */
+.thanks-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -896,7 +896,153 @@ body {
     z-index: 1000;
 }
 
-.support-overlay.show {
+.thanks-overlay.show {
     opacity: 1;
     visibility: visible;
+}
+
+/* Info Panel Content Styles */
+.info-sections {
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.info-section-button {
+    padding: 10px 16px;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.info-tips {
+    margin: 20px 0;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.info-tip-link {
+    display: block;
+    padding: 8px 0;
+    color: #2196f3;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.info-feedback {
+    margin-top: 20px;
+    padding: 8px 16px;
+    background: #e0e0e0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* About Panel Content Styles */
+.about-actions {
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.about-action-button {
+    padding: 10px 16px;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.about-link {
+    display: block;
+    padding: 10px 16px;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #333;
+    text-align: center;
+}
+
+.about-credits {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Thanks Panel Content Styles */
+.thanks-options {
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.thanks-option-button {
+    padding: 12px 20px;
+    background: #e91e63;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.thanks-links {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.thanks-link, .thanks-contact {
+    padding: 8px 16px;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #333;
+    text-align: center;
+    cursor: pointer;
+}
+
+/* Hover States */
+.info-section-button:hover,
+.info-tip-link:hover,
+.info-feedback:hover,
+.about-action-button:hover,
+.about-link:hover,
+.thanks-option-button:hover,
+.thanks-link:hover,
+.thanks-contact:hover {
+    background: #e0e0e0;
+}
+
+.thanks-option-button:hover {
+    background: #d81557;
+}
+
+/* Focus States */
+.info-section-button:focus,
+.info-tip-link:focus,
+.info-feedback:focus,
+.about-action-button:focus,
+.about-link:focus,
+.about-credits-button:focus,
+.about-license-button:focus,
+.thanks-option-button:focus,
+.thanks-link:focus,
+.thanks-contact:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.4);
 }

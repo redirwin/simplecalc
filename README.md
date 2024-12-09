@@ -67,6 +67,7 @@ A lightweight, efficient calculator extension for Chrome that provides essential
     - History panel toggle: (h/H)
     - Help panel toggle: (F1)
     - About panel toggle: (F2)
+    - Thank the Dev toggle: (F3)
     - Close active panel: (Esc)
 
 ### Display Features
