@@ -72,8 +72,25 @@ import FocusTrap from './focusTrap.js';
             about: new FocusTrap(document.querySelector(".about-panel")),
             thanks: new FocusTrap(document.querySelector(".thanks-panel"))
         };
-        
+
         this.focusTraps.calculator.enable();
+
+        const historyPanel = document.querySelector(".history-panel");
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === "class") {
+                    if (historyPanel.classList.contains("open")) {
+                        // Panel has become visible, update focus trap and history
+                        setTimeout(() => {
+                            this.updateHistoryDisplay(); // Re-initialize history entries
+                            this.focusTraps.history.updateFocusableElements();
+                        }, 50);
+                    }
+                }
+            });
+        });
+
+        observer.observe(historyPanel, { attributes: true });
     }
 
     /**
@@ -1162,7 +1179,7 @@ import FocusTrap from './focusTrap.js';
     }
 
     /**
-     * Updates the history panel display
+     * Updates the history display and refreshes focus trap
      */
     updateHistoryDisplay() {
         if (!this.historyList) return;
@@ -1171,7 +1188,7 @@ import FocusTrap from './focusTrap.js';
             this.history.map((entry, index) => `
                 <div class="history-entry" 
                      data-index="${index}" 
-                     tabindex="-1" 
+                     tabindex="0" 
                      role="button" 
                      aria-label="Restore calculation: ${entry.displayExpression} ${this.formatNumber(entry.result)}"
                      title="Press Enter to restore this calculation">
@@ -1194,6 +1211,13 @@ import FocusTrap from './focusTrap.js';
                 }
             });
         });
+
+        // Force focus trap update if history panel is open
+        if (document.querySelector('.history-panel.open')) {
+            setTimeout(() => {
+                this.focusTraps.history.updateFocusableElements();
+            }, 50);
+        }
     }
 
     /**
@@ -1403,6 +1427,11 @@ import FocusTrap from './focusTrap.js';
                 panel.classList.add("open");
                 overlay.classList.add("show");
                 this.activePanel = panelType;
+
+                // Update focus trap before enabling if it's the history panel
+                if (panelType === 'history') {
+                    this.focusTraps.history.updateFocusableElements();
+                }
                 this.focusTraps[panelType].enable();
             }, 300);
         } else {
@@ -1417,6 +1446,11 @@ import FocusTrap from './focusTrap.js';
                 panel.classList.add("open");
                 overlay.classList.add("show");
                 this.activePanel = panelType;
+
+                // Update focus trap before enabling if it's the history panel
+                if (panelType === 'history') {
+                    this.focusTraps.history.updateFocusableElements();
+                }
                 this.focusTraps[panelType].enable();
             }
         }
