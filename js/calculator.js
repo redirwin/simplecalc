@@ -392,22 +392,22 @@ import FocusTrap from './focusTrap.js';
             this.currentInput = this.currentInput.slice(0, -1);
         }
 
-        // Add current input and operator to expression
+        // Add current input to expression if it exists
         if (this.currentInput || this.currentInput === "0") {
             this.expression.push(this.currentInput);
-            this.expression.push(op);
             this.currentInput = "";
-            this.buildOperationString();
-            this.updateDisplay();
         }
-        // Handle case where operator is changed
-        else if (this.expression.length > 0) {
-            if (this.isOperator(this.expression[this.expression.length - 1])) {
-                this.expression[this.expression.length - 1] = op;
-                this.buildOperationString();
-                this.updateDisplay();
-            }
+        
+        // Replace last operator if it exists, otherwise add new operator
+        const lastToken = this.expression[this.expression.length - 1];
+        if (['+', '-', '*', '/'].includes(lastToken)) {
+            this.expression[this.expression.length - 1] = op;
+        } else {
+            this.expression.push(op);
         }
+
+        this.buildOperationString();
+        this.updateDisplay();
     }
 
     /**
@@ -1043,12 +1043,8 @@ import FocusTrap from './focusTrap.js';
         // First, ensure implicit multiplication is maintained in expression array
         for (let i = 0; i < this.expression.length - 1; i++) {
             if (this.expression[i] === ')' &&
-                this.expression[i + 1] !== '*' &&
-                this.expression[i + 1] !== '+' &&
-                this.expression[i + 1] !== '-' &&
-                this.expression[i + 1] !== '/' &&
-                this.expression[i + 1] !== ')') {
-                // Insert multiplication operator
+                !['*', '+', '-', '/', ')'].includes(this.expression[i + 1])) {
+                // Insert multiplication operator only if next token isn't an operator
                 this.expression.splice(i + 1, 0, '*');
                 i++; // Skip the inserted operator
             }
@@ -1073,14 +1069,9 @@ import FocusTrap from './focusTrap.js';
 
         str = str.replace(/\s+/g, ' ').trim();
 
-        // Add current input with proper formatting
+        // Add current input with proper spacing
         if (this.currentInput) {
-            const lastToken = this.expression[this.expression.length - 1];
-            if (lastToken === ')') {
-                str += ` × ${this.currentInput}`;
-            } else {
-                str += str ? ` ${this.currentInput}` : this.currentInput;
-            }
+            str += str ? ` ${this.currentInput}` : this.currentInput;
         }
 
         this.operationString = str;
